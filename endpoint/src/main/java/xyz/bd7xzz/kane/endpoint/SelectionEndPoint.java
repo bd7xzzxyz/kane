@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/data_source")
-public class DataSourceEndpoint {
-
+@RequestMapping("/selection")
+public class SelectionEndPoint {
 }
