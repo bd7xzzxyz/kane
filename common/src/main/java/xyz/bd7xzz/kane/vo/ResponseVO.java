@@ -4,6 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * @author bd7xzz
+ * @version 1.0
+ * @description: 返回结果
+ * @date 7/4/21 12:15 PM
+ */
 @Builder
 @Getter
 public class ResponseVO<T> {

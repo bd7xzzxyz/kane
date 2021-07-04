@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public enum DataSourceTypeConstraint {
-    REAL_TIME_MQ(1, true, "MQ实时上报数据源"),
+    REAL_TIME_KAFKA(1, true, "kafka实时上报数据源"),
     REAL_TIME_HTTP(2, true, "http实时上报数据源"),
     REAL_TIME_HTTP_COLLECTION(3, true, "http实时采集数据源"),
     SCHEDULE_HTTP(4, false, "http定时上报数据源"),

@@ -54,7 +54,7 @@ public interface DataSourceConfigManager {
     /**
      * 获取所有数据源
      *
-     * @return
+     * @return 数据源配置VO
      */
     List<DataSourceConfigVO> listDataSource();
 }
