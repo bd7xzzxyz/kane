@@ -47,7 +47,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
         long id = SnowFlake.getId(snowFlakeProperties.getDataCenterId(), snowFlakeProperties.getMachineId());
         driverVO.setId(id);
         driverVO.setVersion(UUID.randomUUID().toString());
-        DriverHandler.handle(dataSourceConfigVO.getType(), driverVO);
+
         DataSourceConfigPO configPO;
         try {
             configPO = BeanUtil.copy(driverVO, DataSourceConfigPO.class);
@@ -56,6 +56,8 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             throw new KaneRuntimException("register real-time data source error");
         }
         dataSourceConfigRepository.save(configPO);
+
+        DriverHandler.handle(dataSourceConfigVO.getType(), driverVO);
         return id;
     }
 
