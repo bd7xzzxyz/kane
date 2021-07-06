@@ -19,6 +19,7 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
             "(?,?,?,?,?,0,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())";
     private static final String GET_SQL = "SELECT `ds_id`,`name`,`type`,`engine`,`driver`,`version` FROM `t_datasource_config` WHERE `ds_id` = ?";
     private static final String DELETE_SQL = "UPDATE `t_datasource_config` SET `is_delete` = 1,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
+    private static final String UPDATE_SQL = "UPDATE `t_datasource_config` SET `name` = ?,`type` = ?,`engine` = ?,`driver` = ?,`version` = ?,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -49,6 +50,13 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
 
     @Override
     public void update(DataSourceConfigPO configPO) {
-        //TODO
+        jdbcTemplate.update(UPDATE_SQL,
+                configPO.getName(),
+                configPO.getType(),
+                configPO.getEngine(),
+                configPO.getDriver(),
+                configPO.getVersion(),
+                configPO.getId()
+        );
     }
 }

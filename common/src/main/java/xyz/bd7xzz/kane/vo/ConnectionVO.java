@@ -1,8 +1,8 @@
 package xyz.bd7xzz.kane.vo;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author baodi1
@@ -15,4 +15,6 @@ public class ConnectionVO {
     private long id;
     private int type;
     private Object connection;
+    @Setter
+    private String version;
 }

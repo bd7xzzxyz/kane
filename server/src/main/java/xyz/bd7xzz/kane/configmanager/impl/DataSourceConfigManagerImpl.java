@@ -13,11 +13,11 @@ import xyz.bd7xzz.kane.properties.SnowFlakeProperties;
 import xyz.bd7xzz.kane.util.BeanUtil;
 import xyz.bd7xzz.kane.util.JSONUtil;
 import xyz.bd7xzz.kane.util.SnowFlake;
+import xyz.bd7xzz.kane.util.VersionUtil;
 import xyz.bd7xzz.kane.vo.DataSourceConfigVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,11 +39,13 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
         Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
         BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
         long id = SnowFlake.getId(snowFlakeProperties.getDataCenterId(), snowFlakeProperties.getMachineId());
+        String version = VersionUtil.generateVersion();
         driverVO.setId(id);
+        driverVO.setVersion(version);
 
         DataSourceConfigPO configPO = convertDataSourceConfigPO(dataSourceConfigVO);
         configPO.setId(id);
-        configPO.setVersion(UUID.randomUUID().toString());
+        configPO.setVersion(version);
         dataSourceConfigRepository.save(configPO);
 
         ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
@@ -62,11 +64,14 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
         checkDriverValid(dataSourceConfigVO);
         DataSourceConfigPO dataSourceConfigPO = getDataSourceConfigPO(dataSourceConfigVO.getId());
         DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO);
-        newConfig.setVersion(UUID.randomUUID().toString());
+        String version = VersionUtil.generateVersion();
+        newConfig.setVersion(version);
         dataSourceConfigRepository.update(newConfig);
         if (dataSourceConfigPO.getType() != dataSourceConfigVO.getType() || !dataSourceConfigPO.getDriver().equals(dataSourceConfigVO.getDriver())) {
             Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
             BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
+            driverVO.setId(dataSourceConfigVO.getId());
+            driverVO.setVersion(version);
             ConnectionHandler.destroyConnection(dataSourceConfigVO.getId());
             ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
         }
@@ -97,15 +102,20 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
 
     @Override
     public List<DataSourceConfigVO> listDataSource() {
-        //TODO
-        return null;
+        List<DataSourceConfigPO> dataSourceConfigPOS = dataSourceConfigRepository.listDataSource();
+        try {
+            return BeanUtil.copy(dataSourceConfigPOS, DataSourceConfigVO.class);
+        } catch (InstantiationException | IllegalAccessException e) {
+            log.error("listDataSource error when copy bean", e);
+            throw new KaneRuntimException("get data source error");
+        }
     }
 
     /**
      * 转换数据源配置vo->po
      *
-     * @param configVO
-     * @return
+     * @param configVO 数据源配置vo
+     * @return 数据源配置po
      */
     private DataSourceConfigPO convertDataSourceConfigPO(DataSourceConfigVO configVO) {
         DataSourceConfigPO configPO;

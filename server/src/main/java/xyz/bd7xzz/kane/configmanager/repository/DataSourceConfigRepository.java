@@ -2,6 +2,8 @@ package xyz.bd7xzz.kane.configmanager.repository;
 
 import xyz.bd7xzz.kane.po.DataSourceConfigPO;
 
+import java.util.List;
+
 /**
  * @author bd7xzz
  * @version 1.0
@@ -37,4 +39,11 @@ public interface DataSourceConfigRepository {
      * @param configPO 数据源配置
      */
     void update(DataSourceConfigPO configPO);
+
+    /**
+     * 获取所有数据源配置
+     *
+     * @return 数据源配置
+     */
+    List<DataSourceConfigPO> listDataSource();
 }

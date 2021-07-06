@@ -12,7 +12,7 @@ import xyz.bd7xzz.kane.vo.CollectionVO;
  * @date 7/4/21 5:53 PM
  */
 @Service
-public class JSONDataHandlerImpl implements CollectionDataHandler {
+public class JSONDataHandlerImpl extends CollectionDataHandler {
 
     @Override
     public void extract(CollectionVO collectionVO) {
@@ -20,6 +20,5 @@ public class JSONDataHandlerImpl implements CollectionDataHandler {
             return;
         }
 
-        //TODO jsonPath
     }
 }
