@@ -12,5 +12,4 @@ import lombok.Data;
 public class BasicDriverVO {
     private long id;
     private int serializeType;
-    private String version;
 }

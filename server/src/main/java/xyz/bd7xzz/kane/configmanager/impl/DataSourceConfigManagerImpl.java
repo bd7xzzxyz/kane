@@ -2,11 +2,9 @@ package xyz.bd7xzz.kane.configmanager.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.stereotype.Service;
-import xyz.bd7xzz.kane.cache.LocalCache;
+import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.configmanager.DataSourceConfigManager;
-import xyz.bd7xzz.kane.configmanager.DriverHandler;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.exception.KaneRuntimException;
@@ -27,53 +25,56 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
 
     private final SnowFlakeProperties snowFlakeProperties;
     private final DataSourceConfigRepository dataSourceConfigRepository;
-    private final LocalCache localCache;
 
     @Autowired
-    public DataSourceConfigManagerImpl(SnowFlakeProperties snowFlakeProperties, DataSourceConfigRepository dataSourceConfigRepository, LocalCache localCache) {
+    public DataSourceConfigManagerImpl(SnowFlakeProperties snowFlakeProperties, DataSourceConfigRepository dataSourceConfigRepository) {
         this.snowFlakeProperties = snowFlakeProperties;
         this.dataSourceConfigRepository = dataSourceConfigRepository;
-        this.localCache = localCache;
     }
 
     @Override
     public long registerRealtimeDataSource(DataSourceConfigVO dataSourceConfigVO) {
-        if (JSONUtil.validate(dataSourceConfigVO.getDriver())) {
-            throw new IllegalArgumentException("invalid driver json");
-        }
+        checkDriverValid(dataSourceConfigVO);
 
         Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
         BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
         long id = SnowFlake.getId(snowFlakeProperties.getDataCenterId(), snowFlakeProperties.getMachineId());
         driverVO.setId(id);
-        driverVO.setVersion(UUID.randomUUID().toString());
 
-        DataSourceConfigPO configPO;
-        try {
-            configPO = BeanUtil.copy(driverVO, DataSourceConfigPO.class);
-        } catch (IllegalAccessException | InstantiationException e) {
-            log.error("registerRealtimeDataSource error when copy bean", e);
-            throw new KaneRuntimException("register real-time data source error");
-        }
+        DataSourceConfigPO configPO = convertDataSourceConfigPO(dataSourceConfigVO);
+        configPO.setId(id);
+        configPO.setVersion(UUID.randomUUID().toString());
         dataSourceConfigRepository.save(configPO);
 
-        DriverHandler.handle(dataSourceConfigVO.getType(), driverVO);
+        ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
         return id;
     }
 
+
     @Override
     public long registerScheduleDataSource(DataSourceConfigVO dataSourceConfigVO) {
+        //TODO
         return 0;
     }
 
     @Override
     public void updateRealtimeDataSource(DataSourceConfigVO dataSourceConfigVO) {
-
+        checkDriverValid(dataSourceConfigVO);
+        DataSourceConfigPO dataSourceConfigPO = getDataSourceConfigPO(dataSourceConfigVO.getId());
+        DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO);
+        newConfig.setVersion(UUID.randomUUID().toString());
+        dataSourceConfigRepository.update(newConfig);
+        if (dataSourceConfigPO.getType() != dataSourceConfigVO.getType() || !dataSourceConfigPO.getDriver().equals(dataSourceConfigVO.getDriver())) {
+            Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
+            BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
+            ConnectionHandler.destroyConnection(dataSourceConfigVO.getId());
+            ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
+        }
     }
 
     @Override
     public void updateScheduleDataSource(DataSourceConfigVO dataSourceConfigVO) {
-
+        //TODO
     }
 
     @Override
@@ -91,17 +92,41 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
     public void deleteDataSource(long id) {
         getDataSourceConfigPO(id);
         dataSourceConfigRepository.delete(id);
-        ConcurrentMessageListenerContainer container = localCache.getKafkaListenerCache().getIfPresent(id);
-        if (null == container) {
-            return;
-        }
-        container.stop(true);
-        localCache.getKafkaListenerCache().invalidate(id);
+        ConnectionHandler.destroyConnection(id);
     }
 
     @Override
     public List<DataSourceConfigVO> listDataSource() {
+        //TODO
         return null;
+    }
+
+    /**
+     * 转换数据源配置vo->po
+     *
+     * @param configVO
+     * @return
+     */
+    private DataSourceConfigPO convertDataSourceConfigPO(DataSourceConfigVO configVO) {
+        DataSourceConfigPO configPO;
+        try {
+            configPO = BeanUtil.copy(configVO, DataSourceConfigPO.class);
+        } catch (IllegalAccessException | InstantiationException e) {
+            log.error("convertDataSourceConfigPO error when copy bean", e);
+            throw new KaneRuntimException("register or update real-time data source error");
+        }
+        return configPO;
+    }
+
+    /**
+     * 校验驱动是否有效
+     *
+     * @param dataSourceConfigVO 数据源配置vo
+     */
+    private void checkDriverValid(DataSourceConfigVO dataSourceConfigVO) {
+        if (JSONUtil.validate(dataSourceConfigVO.getDriver())) {
+            throw new IllegalArgumentException("invalid driver json");
+        }
     }
 
     /**

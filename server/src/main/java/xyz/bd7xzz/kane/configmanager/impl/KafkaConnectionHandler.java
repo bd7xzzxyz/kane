@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.collection.CollectionDataHandler;
 import xyz.bd7xzz.kane.collection.impl.JSONDataHandlerImpl;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
-import xyz.bd7xzz.kane.configmanager.DriverHandler;
+import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.constraint.CollectionDataSerializeTypeConstraint;
 import xyz.bd7xzz.kane.constraint.DataSourceTypeConstraint;
+import xyz.bd7xzz.kane.exception.KaneRuntimException;
 import xyz.bd7xzz.kane.serialize.KafkaJSONSerializeHandler;
 import xyz.bd7xzz.kane.vo.CollectionVO;
+import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.KafkaDriverVO;
 
 import java.util.List;
@@ -31,10 +33,13 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
  * @date 7/4/21 12:28 PM
  */
 @Service("kafkaDriverHandler")
-public class KafkaDriverHandler extends DriverHandler {
+public class KafkaConnectionHandler extends ConnectionHandler {
 
     @Override
-    public <T> void handle(T driverVO) {
+    protected <T> ConnectionVO createConnection(T driverVO) {
+        if (!(driverVO instanceof KafkaDriverVO)) {
+            throw new KaneRuntimException("invalid driverVO class " + driverVO.getClass() + ",target class is KafkaDriverVO");
+        }
         KafkaDriverVO kafkaDriverVO = (KafkaDriverVO) driverVO;
         List<Class<?>> serializeClasses = CollectionDataSerializeTypeConstraint.getSerializeClasses(kafkaDriverVO.getSerializeType());
         if (CollectionUtils.isEmpty(serializeClasses)) {
@@ -58,9 +63,21 @@ public class KafkaDriverHandler extends DriverHandler {
                 }
             }
         });
-
         ConcurrentMessageListenerContainer container = createContainer(kafkaConsumerFactory, containerProperties);
-        localCache.getKafkaListenerCache().put(kafkaDriverVO.getId(), container);
+        return ConnectionVO.builder()
+                .id(kafkaDriverVO.getId())
+                .type(DataSourceTypeConstraint.REAL_TIME_KAFKA.getType())
+                .connection(container)
+                .build();
+    }
+
+    @Override
+    protected void releaseConnection(ConnectionVO connectionVO) {
+        Object connection = connectionVO.getConnection();
+        if (!(connection instanceof ConcurrentMessageListenerContainer)) {
+            throw new KaneRuntimException("invalid connection class " + connection.getClass() + ",target class is ConcurrentMessageListenerContainer");
+        }
+        ((ConcurrentMessageListenerContainer) connection).stop(true);
     }
 
     /**

@@ -17,8 +17,8 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
 
     private static final String SAVE_SQL = "INSERT INTO `t_datasource_config`(`ds_id`,`name`,`type`,`engine`,`driver`,`version`,`is_delete`,`ctime`,`utime`)VALUES" +
             "(?,?,?,?,?,0,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())";
-    private static final String GET_SQL = "SELECT `ds_id`,`name`,`type`,`engine`,`driver`,`version` FROM `t_datasource_config` WHERE id = ?";
-    private static final String DELETE_SQL = "UPDATE `t_datasource_config` SET `is_delete` = 1,`utime` = CURRENT_TIMESTAMP() WHERE id = ?";
+    private static final String GET_SQL = "SELECT `ds_id`,`name`,`type`,`engine`,`driver`,`version` FROM `t_datasource_config` WHERE `ds_id` = ?";
+    private static final String DELETE_SQL = "UPDATE `t_datasource_config` SET `is_delete` = 1,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -45,5 +45,10 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
     @Override
     public void delete(long id) {
         jdbcTemplate.update(DELETE_SQL, id);
+    }
+
+    @Override
+    public void update(DataSourceConfigPO configPO) {
+        //TODO
     }
 }

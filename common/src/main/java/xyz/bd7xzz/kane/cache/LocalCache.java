@@ -4,11 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.stereotype.Component;
+import xyz.bd7xzz.kane.vo.ConnectionVO;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,35 +18,29 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class LocalCache {
 
-    private final LoadingCache<Long, ConcurrentMessageListenerContainer> kafkaListenerCache =
+    private final LoadingCache<Long, ConnectionVO> connectionCache =
             CacheBuilder.newBuilder()
                     .refreshAfterWrite(30, TimeUnit.SECONDS)
-                    .build(new CacheLoader<Long, ConcurrentMessageListenerContainer>() {
+                    .build(new CacheLoader<Long, ConnectionVO>() {
                         @Override
-                        public ListenableFuture<ConcurrentMessageListenerContainer> reload(Long key, ConcurrentMessageListenerContainer oldValue) throws Exception {
-                            ListenableFutureTask<ConcurrentMessageListenerContainer> task = ListenableFutureTask.create(new Callable<ConcurrentMessageListenerContainer>() {
-                                @Override
-                                public ConcurrentMessageListenerContainer call() throws Exception {
-                                    //TODO load
-                                    return null;
-                                }
-                            });
-                            return task;
+                        public ListenableFuture<ConnectionVO> reload(Long key, ConnectionVO oldValue) throws Exception {
+                            //TODO
+                            return null;
                         }
 
                         @Override
-                        public ConcurrentMessageListenerContainer load(Long id) throws Exception {
+                        public ConnectionVO load(Long id) throws Exception {
                             //TODO load
                             return null;
                         }
                     });
 
     /**
-     * 获取kafka监听者缓存
+     * 获取链接缓存
      *
      * @return 缓存对象
      */
-    public LoadingCache<Long, ConcurrentMessageListenerContainer> getKafkaListenerCache() {
-        return kafkaListenerCache;
+    public LoadingCache<Long, ConnectionVO> getConnectionCache() {
+        return connectionCache;
     }
 }

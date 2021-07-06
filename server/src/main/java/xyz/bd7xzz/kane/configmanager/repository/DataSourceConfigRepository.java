@@ -30,4 +30,11 @@ public interface DataSourceConfigRepository {
      * @param id 数据源id
      */
     void delete(long id);
+
+    /**
+     * 更新数据源配置
+     *
+     * @param configPO 数据源配置
+     */
+    void update(DataSourceConfigPO configPO);
 }
