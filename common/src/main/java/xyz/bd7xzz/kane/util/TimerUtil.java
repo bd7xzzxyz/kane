@@ -256,7 +256,7 @@ public class TimerUtil {
         if (null == task.getExecutor()) {
             task.setExecutor(Executors.newCachedThreadPool());
         }
-        final String taskId = UUID.randomUUID().toString();
+        final String taskId = UUID.randomUUID().toString().replace("-", "");
         REMOVED_TASKS.put(taskId, false);
         DAY.newTimeout(new TimerTask() {
             @Override
