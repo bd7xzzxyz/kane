@@ -4,7 +4,9 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -109,7 +111,7 @@ public class TimerUtil {
             }
 
             /**
-             * 执行执行任务的线程池
+             * 设置执行任务的线程池
              *
              * @param executor 线程池，默认为Executors.newCachedThreadPool()
              * @return build对象
@@ -212,12 +214,48 @@ public class TimerUtil {
         }
 
         /**
-         * 执行执行任务的线程池
+         * 设置执行任务的线程池
          *
          * @param executor 线程池，默认为Executors.newCachedThreadPool()
          */
         public void setExecutor(Executor executor) {
             this.executor = executor;
+        }
+
+        /**
+         * 设置触发时间-天级
+         *
+         * @param day 天
+         */
+        public void setDay(int day) {
+            this.day = day;
+        }
+
+        /**
+         * 设置触发时间-小时级
+         *
+         * @param hour 小时
+         */
+        public void setHour(int hour) {
+            this.hour = hour;
+        }
+
+        /**
+         * 设置触发时间-分钟级
+         *
+         * @param minute 分钟
+         */
+        public void setMinute(int minute) {
+            this.minute = minute;
+        }
+
+        /**
+         * 设置触发时间-秒级
+         *
+         * @param second 秒
+         */
+        public void setSecond(int second) {
+            this.second = second;
         }
     }
 
@@ -240,6 +278,18 @@ public class TimerUtil {
          */
         public void setTaskId(String taskId) {
             this.taskId = taskId;
+        }
+    }
+
+
+    /**
+     * 移除任务
+     *
+     * @param taskId 任务id
+     */
+    public static void removeTask(String taskId) {
+        if (REMOVED_TASKS.containsKey(taskId)) {
+            REMOVED_TASKS.put(taskId, true);
         }
     }
 
@@ -281,14 +331,4 @@ public class TimerUtil {
         return taskId;
     }
 
-    /**
-     * 移除任务
-     *
-     * @param taskId 任务id
-     */
-    public static void removeTask(String taskId) {
-        if (REMOVED_TASKS.containsKey(taskId)) {
-            REMOVED_TASKS.put(taskId, true);
-        }
-    }
 }

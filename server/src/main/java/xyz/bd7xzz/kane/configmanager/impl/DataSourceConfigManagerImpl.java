@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.configmanager.DataSourceConfigManager;
+import xyz.bd7xzz.kane.configmanager.ScheduledService;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.exception.KaneRuntimException;
@@ -25,11 +26,15 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
 
     private final SnowFlakeProperties snowFlakeProperties;
     private final DataSourceConfigRepository dataSourceConfigRepository;
+    private final ScheduledService scheduledService;
 
     @Autowired
-    public DataSourceConfigManagerImpl(SnowFlakeProperties snowFlakeProperties, DataSourceConfigRepository dataSourceConfigRepository) {
+    public DataSourceConfigManagerImpl(SnowFlakeProperties snowFlakeProperties,
+                                       DataSourceConfigRepository dataSourceConfigRepository,
+                                       ScheduledService scheduledService) {
         this.snowFlakeProperties = snowFlakeProperties;
         this.dataSourceConfigRepository = dataSourceConfigRepository;
+        this.scheduledService = scheduledService;
     }
 
     @Override
