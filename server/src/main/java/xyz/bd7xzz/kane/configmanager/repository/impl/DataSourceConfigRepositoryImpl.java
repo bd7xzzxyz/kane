@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.po.DataSourceConfigPO;
 
+import java.util.List;
+
 /**
  * @author bd7xzz
  * @version 1.0
@@ -58,5 +60,11 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
                 configPO.getVersion(),
                 configPO.getId()
         );
+    }
+
+    @Override
+    public List<DataSourceConfigPO> listDataSource() {
+        //TODO
+        return null;
     }
 }
