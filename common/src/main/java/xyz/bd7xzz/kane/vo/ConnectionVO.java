@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author baodi1
+ * @author bd7xzz
  * @description: 链接信息
  * @date 2021/7/6 3:59 下午
  */

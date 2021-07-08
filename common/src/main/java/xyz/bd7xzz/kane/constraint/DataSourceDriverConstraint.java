@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
+import xyz.bd7xzz.kane.vo.driver.HttpDriverVO;
 import xyz.bd7xzz.kane.vo.driver.KafkaDriverVO;
 
 import java.util.Map;
@@ -19,7 +20,8 @@ import java.util.Map;
 @AllArgsConstructor
 public enum DataSourceDriverConstraint {
 
-    KAFKA(1, KafkaDriverVO.class, "kafkaDriverHandler");
+    KAFKA(1, KafkaDriverVO.class, "kafkaDriverHandler"),
+    HTTP(2, HttpDriverVO.class, "httpConnectionHandler");
     private int type;
     private Class<? extends BasicDriverVO> voClazz;
     private String beanName;

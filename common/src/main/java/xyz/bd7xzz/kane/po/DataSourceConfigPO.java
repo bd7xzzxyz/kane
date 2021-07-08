@@ -16,4 +16,5 @@ public class DataSourceConfigPO {
     private String driver;
     private int engine;
     private String version;
+    private String cron;
 }

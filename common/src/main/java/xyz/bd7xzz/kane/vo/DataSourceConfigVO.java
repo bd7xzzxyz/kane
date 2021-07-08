@@ -15,4 +15,5 @@ public class DataSourceConfigVO {
     private String name;
     private String driver;
     private int engine;
+    private String cron;
 }

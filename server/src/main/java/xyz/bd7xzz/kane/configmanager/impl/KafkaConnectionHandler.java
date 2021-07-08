@@ -66,7 +66,7 @@ public class KafkaConnectionHandler extends ConnectionHandler {
         ConcurrentMessageListenerContainer container = createContainer(kafkaConsumerFactory, containerProperties);
         return ConnectionVO.builder()
                 .id(kafkaDriverVO.getId())
-                .type(DataSourceTypeConstraint.REAL_TIME_KAFKA.getType())
+                .type(kafkaDriverVO.getType())
                 .connection(container)
                 .build();
     }

@@ -15,6 +15,7 @@ import xyz.bd7xzz.kane.util.JSONUtil;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +47,11 @@ public class LocalCache {
     @Autowired
     public LocalCache(DataSourceConfigRepository dataSourceConfigRepository) {
         this.dataSourceConfigRepository = dataSourceConfigRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        //TODO
     }
 
     /**
