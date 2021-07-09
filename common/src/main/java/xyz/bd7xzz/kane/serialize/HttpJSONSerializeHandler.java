@@ -1,6 +1,6 @@
 package xyz.bd7xzz.kane.serialize;
 
-import com.google.gson.JsonElement;
+import org.apache.commons.lang3.ArrayUtils;
 import xyz.bd7xzz.kane.util.JSONUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -18,7 +18,14 @@ public class HttpJSONSerializeHandler {
      * @param bytes 字节数组
      * @return jsonElement对象
      */
-    public static JsonElement deserializer(byte[] bytes) {
-        return JSONUtil.parseElement(new String(bytes, StandardCharsets.UTF_8));
+    public static String deserializer(byte[] bytes) {
+        if (ArrayUtils.isEmpty(bytes)) {
+            throw new IllegalArgumentException("invalid ");
+        }
+        String json = new String(bytes, StandardCharsets.UTF_8);
+        if (JSONUtil.validate(json)) {
+            throw new IllegalArgumentException("invalid json!");
+        }
+        return json;
     }
 }

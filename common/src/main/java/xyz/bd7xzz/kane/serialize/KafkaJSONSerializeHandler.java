@@ -1,6 +1,5 @@
 package xyz.bd7xzz.kane.serialize;
 
-import com.google.gson.JsonElement;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import xyz.bd7xzz.kane.util.JSONUtil;
@@ -28,10 +27,14 @@ public class KafkaJSONSerializeHandler {
      * @param data mq报文
      * @return json字符串
      */
-    public static JsonElement deserializer(Object data) {
+    public static String deserializer(Object data) {
         if (null == data) {
-            return null;
+            throw new IllegalArgumentException("invalid json");
         }
-        return JSONUtil.parseElement(data.toString());
+        String json = data.toString();
+        if (JSONUtil.validate(json)) {
+            throw new IllegalArgumentException("invalid json!");
+        }
+        return json;
     }
 }
