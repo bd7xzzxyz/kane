@@ -1,16 +1,13 @@
 package xyz.bd7xzz.kane.util;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 
 public class JSONUtil {
 
     /**
      * 转换jsonObject
      *
-     * @param json
+     * @param json json字符串
      * @param <T>
      * @return
      */
@@ -23,10 +20,50 @@ public class JSONUtil {
     }
 
     /**
+     * 转换jsonObject
+     *
+     * @param json json字符串
+     * @return jsonObject对象
+     */
+    public static JsonObject parseObject(String json) {
+        if (null == json || json.length() == 0) {
+            return null;
+        }
+        return new Gson().fromJson(json, JsonObject.class);
+    }
+
+    /**
+     * 转换jsonElement对象
+     *
+     * @param json json字符串
+     * @return jsonElement对象
+     */
+    public static JsonElement parseElement(String json) {
+        if (null == json || json.length() == 0) {
+            return null;
+        }
+        return new Gson().fromJson(json, JsonElement.class);
+    }
+
+
+    /**
+     * 转换jsonArray
+     *
+     * @param json json字符串
+     * @return jsonArray对象
+     */
+    public static JsonArray parseArray(String json) {
+        if (null == json || json.length() == 0) {
+            return new JsonArray(0);
+        }
+        return new Gson().fromJson(json, JsonArray.class);
+    }
+
+    /**
      * 校验json是否有效
      *
-     * @param json
-     * @return
+     * @param json json字符串
+     * @return true 有效 false 无效
      */
     public static boolean validate(String json) {
         if (null == json || json.trim().equals("")) {

@@ -1,5 +1,6 @@
 package xyz.bd7xzz.kane.vo;
 
+import com.google.gson.JsonElement;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,5 +15,5 @@ import lombok.Getter;
 public class CollectionVO {
     private int from;
     private long generationTime;
-    private String jsonData;
+    private JsonElement jsonData;
 }

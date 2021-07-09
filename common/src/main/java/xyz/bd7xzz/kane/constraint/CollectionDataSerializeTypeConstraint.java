@@ -3,6 +3,7 @@ package xyz.bd7xzz.kane.constraint;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import xyz.bd7xzz.kane.serialize.HttpJSONSerializeHandler;
 import xyz.bd7xzz.kane.serialize.KafkaJSONSerializeHandler;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public enum CollectionDataSerializeTypeConstraint {
 
-    JSON(0, "json", Lists.newArrayList(KafkaJSONSerializeHandler.class));
+    JSON(0, "json", Lists.newArrayList(KafkaJSONSerializeHandler.class, HttpJSONSerializeHandler.class));
     private int type;
     private String name;
     private List<Class<?>> serializeClasses;

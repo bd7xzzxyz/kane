@@ -51,9 +51,12 @@ public class HttpConnectionHandler extends ConnectionHandler {
                 .id(httpDriverVO.getId())
                 .type(httpDriverVO.getType())
                 .connection(HttpConnectionVO.builder()
+                        .serializeType(httpDriverVO.getSerializeType())
                         .sharedConnection(httpDriverVO.isSharedConnection())
                         .httpClient(httpClient)
                         .request(request.build())
+                        .retryCount(httpDriverVO.getRetryCount())
+                        .retry(httpDriverVO.isRetry())
                         .build())
                 .build();
     }

@@ -1,6 +1,5 @@
 package xyz.bd7xzz.kane.collection.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.collection.CollectionDataHandler;
 import xyz.bd7xzz.kane.vo.CollectionVO;
@@ -16,9 +15,7 @@ public class JSONDataHandlerImpl extends CollectionDataHandler {
 
     @Override
     public void extract(CollectionVO collectionVO) {
-        if (StringUtils.isEmpty(collectionVO.getJsonData())) {
-            return;
-        }
+       //TODO
 
     }
 }

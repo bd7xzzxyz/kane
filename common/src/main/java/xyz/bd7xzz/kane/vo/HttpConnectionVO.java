@@ -19,4 +19,8 @@ public class HttpConnectionVO {
     @Setter
     private Request request;
     private boolean sharedConnection;
+    private boolean retry;
+    private int retryCount;
+    private int serializeType;
+
 }

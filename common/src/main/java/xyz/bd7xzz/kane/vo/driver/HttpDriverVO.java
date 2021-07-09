@@ -24,4 +24,6 @@ public class HttpDriverVO extends BasicDriverVO {
     private long writeTimeout = 1000;
     private boolean sharedConnection = true;
     private boolean retryOnConnectionFailure = true;
+    private boolean retry;
+    private int retryCount = 3;
 }
