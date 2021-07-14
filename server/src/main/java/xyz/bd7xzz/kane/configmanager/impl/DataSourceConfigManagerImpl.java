@@ -60,25 +60,20 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
 
     @Override
     public void updateRealtimeDataSource(DataSourceConfigVO dataSourceConfigVO) {
-        checkDriverValid(dataSourceConfigVO);
-        DataSourceConfigPO dataSourceConfigPO = getDataSourceConfigPO(dataSourceConfigVO.getId());
-        DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO);
-        String version = VersionUtil.generateVersion();
-        newConfig.setVersion(version);
-        dataSourceConfigRepository.update(newConfig);
-        if (dataSourceConfigPO.getType() != dataSourceConfigVO.getType() || !dataSourceConfigPO.getDriver().equals(dataSourceConfigVO.getDriver())) {
-            Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
-            BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
-            driverVO.setId(dataSourceConfigVO.getId());
-            driverVO.setVersion(version);
-            ConnectionHandler.destroyConnection(dataSourceConfigVO.getId());
-            ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
+        DataSourceConfigPO dataSourceConfigPO = updateDataSource(dataSourceConfigVO);
+        if (!dataSourceConfigPO.getDriver().equals(dataSourceConfigVO.getDriver())) {
+            renewConnection(dataSourceConfigVO, dataSourceConfigPO);
         }
     }
 
     @Override
     public void updateScheduleDataSource(DataSourceConfigVO dataSourceConfigVO) {
-        //TODO
+        DataSourceConfigPO dataSourceConfigPO = updateDataSource(dataSourceConfigVO);
+        if (!dataSourceConfigPO.getDriver().equals(dataSourceConfigVO.getDriver())) {
+            ConnectionVO connection = renewConnection(dataSourceConfigVO, dataSourceConfigPO);
+            scheduledService.schedule(SpringContextUtil.getBean(ScheduleCollectionConstraint.getBeanName(dataSourceConfigVO.getType()), ServiceHandler.class),
+                    connection, dataSourceConfigVO.getCron(), ScheduleTypeConstraint.DATA_COLLECT);
+        }
     }
 
     @Override
@@ -196,4 +191,38 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
         return dataSourceConfigPO;
     }
 
+    /**
+     * 更新数据源
+     *
+     * @param dataSourceConfigVO 数据源配置vo
+     * @return 修改后的DataSourceConfigPO 实例
+     */
+    private DataSourceConfigPO updateDataSource(DataSourceConfigVO dataSourceConfigVO) {
+        checkDriverValid(dataSourceConfigVO);
+        DataSourceConfigPO dataSourceConfigPO = getDataSourceConfigPO(dataSourceConfigVO.getId());
+        if (dataSourceConfigPO.getType() != dataSourceConfigVO.getType()) {
+            throw new IllegalArgumentException("data source type cannot be modified");
+        }
+        DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO);
+        String version = VersionUtil.generateVersion();
+        newConfig.setVersion(version);
+        dataSourceConfigRepository.update(newConfig);
+        return newConfig;
+    }
+
+    /**
+     * 释放原链接重新创建一个链接
+     *
+     * @param dataSourceConfigVO 数据源配置vo
+     * @param dataSourceConfigPO 数据源配置po
+     * @return ConnectionVO 对象
+     */
+    private ConnectionVO renewConnection(DataSourceConfigVO dataSourceConfigVO, DataSourceConfigPO dataSourceConfigPO) {
+        Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigVO.getType());
+        BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigVO.getDriver(), driverVOClass);
+        driverVO.setId(dataSourceConfigVO.getId());
+        driverVO.setVersion(dataSourceConfigPO.getVersion());
+        ConnectionHandler.destroyConnection(dataSourceConfigVO.getId());
+        return ConnectionHandler.createConnection(dataSourceConfigVO.getType(), driverVO);
+    }
 }
