@@ -8,6 +8,12 @@ import xyz.bd7xzz.kane.vo.ResponseVO;
 
 import java.util.List;
 
+/**
+ * @author bd7xzz
+ * @version 1.0
+ * @description: 数据源门面
+ * @date 7/14/21 9:17 PM
+ */
 @Service
 public class DataSourceConfigFacade {
     private final DataSourceConfigManager dataSourceConfigManager;
@@ -37,7 +43,7 @@ public class DataSourceConfigFacade {
      * 更新数据源
      *
      * @param dataSourceConfigVO 数据源配置VO
-     * @return ResponseVO
+     * @return ResponseVO ResponseVO对象
      */
     public ResponseVO updateDataSource(DataSourceConfigVO dataSourceConfigVO) {
         if (DataSourceTypeConstraint.isRealTime(dataSourceConfigVO.getType())) {

@@ -3,7 +3,12 @@ package xyz.bd7xzz.kane.configmanager;
 import xyz.bd7xzz.kane.vo.DataSourceConfigVO;
 
 import java.util.List;
-
+/**
+ * @author bd7xzz
+ * @version 1.0
+ * @description: 数据源配置服务
+ * @date 7/14/21 10:00 PM
+ */
 public interface DataSourceConfigManager {
 
     /**

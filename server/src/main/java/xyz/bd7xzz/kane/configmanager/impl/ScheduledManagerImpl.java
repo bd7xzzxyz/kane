@@ -3,7 +3,7 @@ package xyz.bd7xzz.kane.configmanager.impl;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
-import xyz.bd7xzz.kane.configmanager.ScheduledService;
+import xyz.bd7xzz.kane.configmanager.ScheduledManager;
 import xyz.bd7xzz.kane.constraint.ScheduleTypeConstraint;
 import xyz.bd7xzz.kane.constraint.ServiceHandler;
 import xyz.bd7xzz.kane.util.TimerUtil;
@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
  * @date 2021/7/7 6:02 下午
  */
 @Service
-public class ScheduledServiceImpl implements ScheduledService {
+public class ScheduledManagerImpl implements ScheduledManager {
 
     @PostConstruct
     public void init() {

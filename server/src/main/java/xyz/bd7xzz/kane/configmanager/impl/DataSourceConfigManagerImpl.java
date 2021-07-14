@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
 import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.configmanager.DataSourceConfigManager;
-import xyz.bd7xzz.kane.configmanager.ScheduledService;
+import xyz.bd7xzz.kane.configmanager.ScheduledManager;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.constraint.ScheduleCollectionConstraint;
@@ -25,18 +25,24 @@ import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
 import java.util.List;
 
+/**
+ * @author bd7xzz
+ * @version 1.0
+ * @description: 数据源配置服务
+ * @date 7/14/21 10:00 PM
+ */
 @Slf4j
 @Service
 public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
 
     private final SnowFlakeProperties snowFlakeProperties;
     private final DataSourceConfigRepository dataSourceConfigRepository;
-    private final ScheduledService scheduledService;
+    private final ScheduledManager scheduledService;
 
     @Autowired
     public DataSourceConfigManagerImpl(SnowFlakeProperties snowFlakeProperties,
                                        DataSourceConfigRepository dataSourceConfigRepository,
-                                       ScheduledService scheduledService) {
+                                       ScheduledManager scheduledService) {
         this.snowFlakeProperties = snowFlakeProperties;
         this.dataSourceConfigRepository = dataSourceConfigRepository;
         this.scheduledService = scheduledService;
@@ -195,7 +201,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
      * 更新数据源
      *
      * @param dataSourceConfigVO 数据源配置vo
-     * @return 修改后的DataSourceConfigPO 实例
+     * @return 修改后的DataSourceConfigPO 对象
      */
     private DataSourceConfigPO updateDataSource(DataSourceConfigVO dataSourceConfigVO) {
         checkDriverValid(dataSourceConfigVO);

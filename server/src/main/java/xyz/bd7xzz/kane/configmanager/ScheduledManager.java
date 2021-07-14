@@ -8,7 +8,7 @@ import xyz.bd7xzz.kane.constraint.ServiceHandler;
  * @description: 调度服务
  * @date 2021/7/7 6:02 下午
  */
-public interface ScheduledService {
+public interface ScheduledManager {
 
 
 

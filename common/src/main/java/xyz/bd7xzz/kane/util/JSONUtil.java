@@ -1,22 +1,42 @@
 package xyz.bd7xzz.kane.util;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.List;
 
 public class JSONUtil {
 
     /**
      * 转换jsonObject
      *
-     * @param json json字符串
+     * @param json  json字符串
+     * @param clazz 目标类
      * @param <T>
-     * @return
+     * @return 目标对象
      */
     public static <T> T parseObject(String json, Class<T> clazz) {
         if (null == json || json.trim().equals("")) {
             return null;
         }
-        Gson gson = new Gson();
-        return gson.fromJson(json, clazz);
+        return new Gson().fromJson(json, clazz);
+    }
+
+    /**
+     * 转换jsonArray
+     *
+     * @param json  json字符串
+     * @param clazz 目标类
+     * @param <T>
+     * @return 目标list对象
+     */
+    public static <T> List<T> parseArray(String json, Class<T> clazz) {
+        if (null == json || json.trim().equals("")) {
+            return null;
+        }
+
+        return new Gson().fromJson(json, new TypeToken<T>() {
+        }.getType());
     }
 
     /**
