@@ -1,11 +1,14 @@
 package xyz.bd7xzz.kane.configmanager;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.vo.CollectionFieldVO;
+import xyz.bd7xzz.kane.vo.DataSourceConfigVO;
 import xyz.bd7xzz.kane.vo.ResponseVO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bd7xzz
@@ -17,10 +20,12 @@ import java.util.List;
 public class CollectionFieldFacade {
 
     private final CollectionFieldManager collectionFieldManager;
+    private final DataSourceConfigManager dataSourceConfigManager;
 
     @Autowired
-    public CollectionFieldFacade(CollectionFieldManager collectionFieldManager) {
+    public CollectionFieldFacade(CollectionFieldManager collectionFieldManager, DataSourceConfigManager dataSourceConfigManager) {
         this.collectionFieldManager = collectionFieldManager;
+        this.dataSourceConfigManager = dataSourceConfigManager;
     }
 
     /**
@@ -30,7 +35,14 @@ public class CollectionFieldFacade {
      * @return ResponseVO 创建后的采集字段id列表
      */
     public ResponseVO addCollectionField(List<CollectionFieldVO> collectionFields) {
-        return null;
+        if (CollectionUtils.isEmpty(collectionFields)) {
+            throw new IllegalArgumentException("invalid collection fields");
+        }
+
+        List<Long> dsIdList = collectionFields.stream().map(CollectionFieldVO::getDataSourceId).collect(Collectors.toList());
+        List<DataSourceConfigVO> dataSourceConfigVOS = dataSourceConfigManager.batchGetDataSourceById(dsIdList);
+        List<Long> fieldIds = collectionFieldManager.addCollectionField(collectionFields, dataSourceConfigVOS);
+        return ResponseVO.buildSuccess(fieldIds);
     }
 
     /**
@@ -50,7 +62,7 @@ public class CollectionFieldFacade {
      * @return ResponseVO 采集字段
      */
     public ResponseVO getCollectionField(long id) {
-        return null;
+        return ResponseVO.buildSuccess(collectionFieldManager.getById(id));
     }
 
     /**

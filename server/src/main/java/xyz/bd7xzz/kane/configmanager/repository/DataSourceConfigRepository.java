@@ -46,4 +46,11 @@ public interface DataSourceConfigRepository {
      * @return 数据源配置
      */
     List<DataSourceConfigPO> listDataSource();
+
+    /**
+     * 根据多个id获取数据源
+     * @param ids id列表
+     * @return 数据源配置
+     */
+    List<DataSourceConfigPO> batchGetDataSourceById(List<Long> ids);
 }

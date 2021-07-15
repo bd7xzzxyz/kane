@@ -3,6 +3,7 @@ package xyz.bd7xzz.kane.configmanager;
 import xyz.bd7xzz.kane.vo.DataSourceConfigVO;
 
 import java.util.List;
+
 /**
  * @author bd7xzz
  * @version 1.0
@@ -62,4 +63,12 @@ public interface DataSourceConfigManager {
      * @return 数据源配置VO
      */
     List<DataSourceConfigVO> listDataSource();
+
+    /**
+     * 批量根据id获取数据源
+     *
+     * @param ids 数据源id
+     * @return 数据源配置VO
+     */
+    List<DataSourceConfigVO> batchGetDataSourceById(List<Long> ids);
 }

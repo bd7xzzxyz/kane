@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import xyz.bd7xzz.kane.configmanager.repository.CollectionFieldRepository;
+import xyz.bd7xzz.kane.po.CollectionFieldPO;
+
+import java.util.List;
 
 /**
  * @author bd7xzz
@@ -19,5 +22,16 @@ public class CollectionFieldRepositoryImpl implements CollectionFieldRepository 
     @Autowired
     public CollectionFieldRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public void batchSave(List<CollectionFieldPO> fieldPOS) {
+        //TODO
+    }
+
+    @Override
+    public CollectionFieldPO getById(long id) {
+        //TODO
+        return null;
     }
 }

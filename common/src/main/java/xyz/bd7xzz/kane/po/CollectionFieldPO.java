@@ -1,4 +1,4 @@
-package xyz.bd7xzz.kane.vo;
+package xyz.bd7xzz.kane.po;
 
 import lombok.Data;
 
@@ -6,10 +6,10 @@ import lombok.Data;
  * @author bd7xzz
  * @version 1.0
  * @description: 采集字段
- * @date 7/14/21 9:07 PM
+ * @date 7/15/21 9:43 PM
  */
 @Data
-public class CollectionFieldVO {
+public class CollectionFieldPO {
     private long id;
     private long dataSourceId;
     private String name;

@@ -5,13 +5,16 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import xyz.bd7xzz.kane.configmanager.CollectionFieldManager;
 import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.po.DataSourceConfigPO;
 import xyz.bd7xzz.kane.util.JSONUtil;
+import xyz.bd7xzz.kane.vo.CollectionFieldVO;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
@@ -25,9 +28,12 @@ import java.util.concurrent.TimeUnit;
  * @date 7/4/21 2:00 PM
  */
 @Component
+@Slf4j
 public class LocalCache {
 
     private final DataSourceConfigRepository dataSourceConfigRepository;
+    private final CollectionFieldManager collectionFieldManager;
+
 
     private final LoadingCache<Long, ConnectionVO> connectionCache =
             CacheBuilder.newBuilder()
@@ -44,9 +50,24 @@ public class LocalCache {
                         }
                     });
 
+    private final LoadingCache<Long, CollectionFieldVO> collectionFieldCache = CacheBuilder.newBuilder()
+            .refreshAfterWrite(30, TimeUnit.SECONDS)
+            .build(new CacheLoader<Long, CollectionFieldVO>() {
+                @Override
+                public ListenableFuture<CollectionFieldVO> reload(Long key, CollectionFieldVO oldValue) throws Exception {
+                    return ListenableFutureTask.create(() -> loadCollectionField(key));
+                }
+
+                @Override
+                public CollectionFieldVO load(Long id) throws Exception {
+                    return loadCollectionField(id);
+                }
+            });
+
     @Autowired
-    public LocalCache(DataSourceConfigRepository dataSourceConfigRepository) {
+    public LocalCache(DataSourceConfigRepository dataSourceConfigRepository, CollectionFieldManager collectionFieldManager) {
         this.dataSourceConfigRepository = dataSourceConfigRepository;
+        this.collectionFieldManager = collectionFieldManager;
     }
 
     @PostConstruct
@@ -82,5 +103,14 @@ public class LocalCache {
         Class<? extends BasicDriverVO> driverVOClass = DataSourceDriverConstraint.getVOClass(dataSourceConfigPO.getType());
         BasicDriverVO driverVO = JSONUtil.parseObject(dataSourceConfigPO.getDriver(), driverVOClass);
         return ConnectionHandler.createConnectionWithOutCache(dataSourceConfigPO.getType(), driverVO);
+    }
+
+    /**
+     * 加载采集字段
+     * @param id 采集字段id
+     * @return 采集字段vo对象
+     */
+    private CollectionFieldVO loadCollectionField(long id) {
+        return collectionFieldManager.getById(id);
     }
 }

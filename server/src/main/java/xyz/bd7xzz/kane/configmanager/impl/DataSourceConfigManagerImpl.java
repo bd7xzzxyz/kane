@@ -1,5 +1,6 @@
 package xyz.bd7xzz.kane.configmanager.impl;
 
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,22 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             log.error("listDataSource error when copy bean", e);
             throw new KaneRuntimException("get data source error");
         }
+    }
+
+    @Override
+    public List<DataSourceConfigVO> batchGetDataSourceById(List<Long> ids) {
+        List<List<Long>> batchIds = Lists.partition(ids, 100);
+        List<DataSourceConfigVO> results = Lists.newArrayListWithCapacity(ids.size());
+        try {
+            for (List<Long> idList : batchIds) {
+                List<DataSourceConfigPO> dataSourceConfigPOS = dataSourceConfigRepository.batchGetDataSourceById(idList);
+                results.addAll(BeanUtil.copy(dataSourceConfigPOS, DataSourceConfigVO.class));
+            }
+        } catch (InstantiationException | IllegalAccessException e) {
+            log.error("listDataSource error when copy bean", e);
+            throw new KaneRuntimException("get data source error");
+        }
+        return results;
     }
 
     /**

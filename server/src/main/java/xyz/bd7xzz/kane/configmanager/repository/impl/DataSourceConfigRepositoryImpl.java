@@ -1,8 +1,10 @@
 package xyz.bd7xzz.kane.configmanager.repository.impl;
 
+import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import xyz.bd7xzz.kane.configmanager.repository.DataSourceConfigRepository;
 import xyz.bd7xzz.kane.po.DataSourceConfigPO;
@@ -25,6 +27,7 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
     private static final String DELETE_SQL = "UPDATE `t_datasource_config` SET `is_delete` = 1,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private static final String UPDATE_SQL = "UPDATE `t_datasource_config` SET `name` = ?,`type` = ?,`engine` = ?,`driver` = ?,`version` = ?,`cron` = ?,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private static final String LIST_SQL = "SELECT " + BASE_COLUMN + " FROM `t_datasource_config` WHERE `is_delete` = 0 ORDER BY `id` DESC";
+    private static final String BATCH_GET_DATA_SOURCE_BY_ID_SQL = "SELECT " + BASE_COLUMN + " FROM `t_datasource_config` WHERE `is_delete` = 0 AND `ds_id` IN (:ids) ORDER BY `id` DESC";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -71,4 +74,11 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
     public List<DataSourceConfigPO> listDataSource() {
         return jdbcTemplate.query(LIST_SQL, new BeanPropertyRowMapper<>(DataSourceConfigPO.class));
     }
+
+    @Override
+    public List<DataSourceConfigPO> batchGetDataSourceById(List<Long> ids) {
+        return new NamedParameterJdbcTemplate(jdbcTemplate).
+                query(BATCH_GET_DATA_SOURCE_BY_ID_SQL, ImmutableMap.of("ids", ids), new BeanPropertyRowMapper<>());
+    }
+
 }
