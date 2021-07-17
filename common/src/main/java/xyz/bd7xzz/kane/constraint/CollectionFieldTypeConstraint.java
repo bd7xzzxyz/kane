@@ -12,8 +12,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CollectionFieldTypeConstraint {
-    AUTO(0, "auto"), LONG(1, "long"), INT(2, "integer"), DOUBLE(3, "double"),
-    FLOAT(4, "float"), CHAR(5, "character"), STRING(6, "string"), BOOL(7, "boolean");
+    AUTO(1, "auto"), LONG(2, "long"), INT(3, "integer"), DOUBLE(4, "double"),
+    FLOAT(5, "float"), CHAR(6, "character"), STRING(7, "string"), BOOL(8, "boolean");
     private int type;
     private String name;
 }

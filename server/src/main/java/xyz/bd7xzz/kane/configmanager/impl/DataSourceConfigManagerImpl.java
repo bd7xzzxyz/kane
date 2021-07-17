@@ -13,7 +13,7 @@ import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.constraint.ScheduleCollectionConstraint;
 import xyz.bd7xzz.kane.constraint.ScheduleTypeConstraint;
 import xyz.bd7xzz.kane.constraint.ServiceHandler;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.po.DataSourceConfigPO;
 import xyz.bd7xzz.kane.properties.SnowFlakeProperties;
 import xyz.bd7xzz.kane.util.BeanUtil;
@@ -90,7 +90,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             return BeanUtil.copy(dataSourceConfigPO, DataSourceConfigVO.class);
         } catch (IllegalAccessException | InstantiationException e) {
             log.error("getDataSourceById error when copy bean", e);
-            throw new KaneRuntimException("get data source error");
+            throw new KaneRuntimeException("get data source error");
         }
     }
 
@@ -108,7 +108,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             return BeanUtil.copy(dataSourceConfigPOS, DataSourceConfigVO.class);
         } catch (InstantiationException | IllegalAccessException e) {
             log.error("listDataSource error when copy bean", e);
-            throw new KaneRuntimException("get data source error");
+            throw new KaneRuntimeException("get data source error");
         }
     }
 
@@ -123,7 +123,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             }
         } catch (InstantiationException | IllegalAccessException e) {
             log.error("listDataSource error when copy bean", e);
-            throw new KaneRuntimException("get data source error");
+            throw new KaneRuntimeException("get data source error");
         }
         return results;
     }
@@ -184,7 +184,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
             configPO = BeanUtil.copy(configVO, DataSourceConfigPO.class);
         } catch (IllegalAccessException | InstantiationException e) {
             log.error("convertDataSourceConfigPO error when copy bean", e);
-            throw new KaneRuntimException("register or update real-time data source error");
+            throw new KaneRuntimeException("register or update real-time data source error");
         }
         return configPO;
     }
@@ -226,7 +226,7 @@ public class DataSourceConfigManagerImpl implements DataSourceConfigManager {
         if (dataSourceConfigPO.getType() != dataSourceConfigVO.getType()) {
             throw new IllegalArgumentException("data source type cannot be modified");
         }
-        DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO);
+        DataSourceConfigPO newConfig = convertDataSourceConfigPO(dataSourceConfigVO).diffAndSet(dataSourceConfigPO);
         String version = VersionUtil.generateVersion();
         newConfig.setVersion(version);
         dataSourceConfigRepository.update(newConfig);

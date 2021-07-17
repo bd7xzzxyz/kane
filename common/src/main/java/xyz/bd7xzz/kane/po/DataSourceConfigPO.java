@@ -1,6 +1,7 @@
 package xyz.bd7xzz.kane.po;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author bd7xzz
@@ -17,4 +18,32 @@ public class DataSourceConfigPO {
     private int engine;
     private String version;
     private String cron;
+
+    /**
+     * 处理新对象字段空值
+     *
+     * @param oldConfig 旧对象
+     * @return 新对象
+     */
+    public DataSourceConfigPO diffAndSet(DataSourceConfigPO oldConfig) {
+        if (id <= 0) {
+            id = oldConfig.getId();
+        }
+        if (type <= 0) {
+            type = oldConfig.getType();
+        }
+        if (StringUtils.isEmpty(name)) {
+            name = oldConfig.getName();
+        }
+        if (StringUtils.isEmpty(driver)) {
+            driver = oldConfig.getDriver();
+        }
+        if (engine <= 0) {
+            engine = oldConfig.getEngine();
+        }
+        if (StringUtils.isEmpty(cron)) {
+            cron = oldConfig.getCron();
+        }
+        return this;
+    }
 }

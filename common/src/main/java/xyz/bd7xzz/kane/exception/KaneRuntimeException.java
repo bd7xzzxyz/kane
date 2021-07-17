@@ -6,10 +6,10 @@ package xyz.bd7xzz.kane.exception;
  * @description: 运行时异常
  * @date 7/4/21 8:24 PM
  */
-public class KaneRuntimException extends RuntimeException {
+public class KaneRuntimeException extends RuntimeException {
     private String message;
 
-    public KaneRuntimException(String message) {
+    public KaneRuntimeException(String message) {
         this.message = message;
     }
 

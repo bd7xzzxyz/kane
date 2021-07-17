@@ -23,7 +23,7 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
     private static final String BASE_COLUMN = "`ds_id` AS `id`,`name`,`type`,`engine`,`driver`,`version`,`cron`";
     private static final String SAVE_SQL = "INSERT INTO `t_datasource_config`(`ds_id`,`name`,`type`,`engine`,`driver`,`version`,`cron`,`is_delete`,`ctime`,`utime`)VALUES" +
             "(?,?,?,?,?,?,0,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())";
-    private static final String GET_SQL = "SELECT " + BASE_COLUMN + " FROM `t_datasource_config` WHERE `ds_id` = ?";
+    private static final String GET_SQL = "SELECT " + BASE_COLUMN + " FROM `t_datasource_config` WHERE `ds_id` = ? AND `is_delete` = 0 LIMIT 1";
     private static final String DELETE_SQL = "UPDATE `t_datasource_config` SET `is_delete` = 1,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private static final String UPDATE_SQL = "UPDATE `t_datasource_config` SET `name` = ?,`type` = ?,`engine` = ?,`driver` = ?,`version` = ?,`cron` = ?,`utime` = CURRENT_TIMESTAMP() WHERE `ds_id` = ?";
     private static final String LIST_SQL = "SELECT " + BASE_COLUMN + " FROM `t_datasource_config` WHERE `is_delete` = 0 ORDER BY `id` DESC";
@@ -78,7 +78,7 @@ public class DataSourceConfigRepositoryImpl implements DataSourceConfigRepositor
     @Override
     public List<DataSourceConfigPO> batchGetDataSourceById(List<Long> ids) {
         return new NamedParameterJdbcTemplate(jdbcTemplate).
-                query(BATCH_GET_DATA_SOURCE_BY_ID_SQL, ImmutableMap.of("ids", ids), new BeanPropertyRowMapper<>());
+                query(BATCH_GET_DATA_SOURCE_BY_ID_SQL, ImmutableMap.of("ids", ids), new BeanPropertyRowMapper<>(DataSourceConfigPO.class));
     }
 
 }

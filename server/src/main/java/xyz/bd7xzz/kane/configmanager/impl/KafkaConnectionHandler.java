@@ -15,7 +15,7 @@ import xyz.bd7xzz.kane.component.SpringContextUtil;
 import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.constraint.CollectionDataSerializeTypeConstraint;
 import xyz.bd7xzz.kane.constraint.DataSourceTypeConstraint;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.serialize.KafkaJSONSerializeHandler;
 import xyz.bd7xzz.kane.vo.CollectionVO;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
@@ -38,7 +38,7 @@ public class KafkaConnectionHandler extends ConnectionHandler {
     @Override
     protected <T> ConnectionVO createConnection(T driverVO) {
         if (!(driverVO instanceof KafkaDriverVO)) {
-            throw new KaneRuntimException("invalid driverVO class " + driverVO.getClass() + ",target class is KafkaDriverVO");
+            throw new KaneRuntimeException("invalid driverVO class " + driverVO.getClass() + ",target class is KafkaDriverVO");
         }
         KafkaDriverVO kafkaDriverVO = (KafkaDriverVO) driverVO;
         List<Class<?>> serializeClasses = CollectionDataSerializeTypeConstraint.getSerializeClasses(kafkaDriverVO.getSerializeType());
@@ -75,7 +75,7 @@ public class KafkaConnectionHandler extends ConnectionHandler {
     protected void releaseConnection(ConnectionVO connectionVO) {
         Object connection = connectionVO.getConnection();
         if (!(connection instanceof ConcurrentMessageListenerContainer)) {
-            throw new KaneRuntimException("invalid connection class " + connection.getClass() + ",target class is ConcurrentMessageListenerContainer");
+            throw new KaneRuntimeException("invalid connection class " + connection.getClass() + ",target class is ConcurrentMessageListenerContainer");
         }
         ((ConcurrentMessageListenerContainer) connection).stop(true);
     }

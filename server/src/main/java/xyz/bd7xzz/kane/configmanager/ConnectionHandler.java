@@ -5,7 +5,7 @@ import xyz.bd7xzz.kane.cache.LocalCache;
 import xyz.bd7xzz.kane.collection.CollectionDataHandler;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
@@ -25,7 +25,7 @@ public abstract class ConnectionHandler {
     public static <T extends BasicDriverVO> ConnectionVO createConnection(int type, T driverVO) {
         ConnectionVO connection = createConnectionWithOutCache(type, driverVO);
         if (connection == null) {
-            throw new KaneRuntimException("invalid connection!");
+            throw new KaneRuntimeException("invalid connection!");
         }
         LocalCache localCache = SpringContextUtil.getBean(LocalCache.class);
         localCache.getConnectionCache().put(driverVO.getId(), connection);

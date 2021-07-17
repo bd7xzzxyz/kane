@@ -19,6 +19,7 @@ import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,16 +51,16 @@ public class LocalCache {
                         }
                     });
 
-    private final LoadingCache<Long, CollectionFieldVO> collectionFieldCache = CacheBuilder.newBuilder()
+    private final LoadingCache<Long, List<CollectionFieldVO>> collectionFieldCache = CacheBuilder.newBuilder()
             .refreshAfterWrite(30, TimeUnit.SECONDS)
-            .build(new CacheLoader<Long, CollectionFieldVO>() {
+            .build(new CacheLoader<Long, List<CollectionFieldVO>>() {
                 @Override
-                public ListenableFuture<CollectionFieldVO> reload(Long key, CollectionFieldVO oldValue) throws Exception {
+                public ListenableFuture<List<CollectionFieldVO>> reload(Long key, List<CollectionFieldVO> oldValue) throws Exception {
                     return ListenableFutureTask.create(() -> loadCollectionField(key));
                 }
 
                 @Override
-                public CollectionFieldVO load(Long id) throws Exception {
+                public List<CollectionFieldVO> load(Long id) throws Exception {
                     return loadCollectionField(id);
                 }
             });
@@ -85,6 +86,15 @@ public class LocalCache {
     }
 
     /**
+     * 获取采集字段缓存
+     *
+     * @return 采集字段对象
+     */
+    public LoadingCache<Long, List<CollectionFieldVO>> getCollectionFieldCache() {
+        return collectionFieldCache;
+    }
+
+    /**
      * 按id加载链接到缓存
      *
      * @param id       数据源id
@@ -107,10 +117,11 @@ public class LocalCache {
 
     /**
      * 加载采集字段
-     * @param id 采集字段id
+     *
+     * @param dataSourceId 采集数据源id
      * @return 采集字段vo对象
      */
-    private CollectionFieldVO loadCollectionField(long id) {
-        return collectionFieldManager.getById(id);
+    private List<CollectionFieldVO> loadCollectionField(long dataSourceId) {
+        return collectionFieldManager.getCollectionFieldByDataSourceId(dataSourceId);
     }
 }

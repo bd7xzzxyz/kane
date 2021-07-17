@@ -5,7 +5,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.HttpConnectionVO;
 import xyz.bd7xzz.kane.vo.driver.HttpDriverVO;
@@ -31,7 +31,7 @@ public class HttpConnectionHandler extends ConnectionHandler {
     @Override
     protected <T> ConnectionVO createConnection(T driverVO) {
         if (!(driverVO instanceof HttpDriverVO)) {
-            throw new KaneRuntimException("invalid driverVO class " + driverVO.getClass() + ",target class is HttpDriverVO");
+            throw new KaneRuntimeException("invalid driverVO class " + driverVO.getClass() + ",target class is HttpDriverVO");
         }
         HttpDriverVO httpDriverVO = (HttpDriverVO) driverVO;
         OkHttpClient httpClient = getOkHttpClient(httpDriverVO);

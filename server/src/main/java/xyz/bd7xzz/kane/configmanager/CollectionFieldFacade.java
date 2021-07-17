@@ -52,7 +52,9 @@ public class CollectionFieldFacade {
      * @return ResponseVO对象
      */
     public ResponseVO updateCollectionField(CollectionFieldVO collectionFieldVO) {
-        return null;
+        DataSourceConfigVO dataSourceConfigVO = dataSourceConfigManager.getDataSourceById(collectionFieldVO.getDataSourceId());
+        collectionFieldManager.updateCollectionField(collectionFieldVO, dataSourceConfigVO);
+        return ResponseVO.buildSuccess();
     }
 
     /**
@@ -72,7 +74,8 @@ public class CollectionFieldFacade {
      * @return ResponseVO对象
      */
     public ResponseVO deleteCollectionField(long id) {
-        return null;
+        collectionFieldManager.deleteCollectionField(id);
+        return ResponseVO.buildSuccess();
     }
 
     /**
@@ -82,6 +85,8 @@ public class CollectionFieldFacade {
      * @return 所有采集字段
      */
     public ResponseVO getCollectionFieldByDataSourceId(long dataSourceId) {
-        return null;
+        dataSourceConfigManager.getDataSourceById(dataSourceId);
+        List<CollectionFieldVO> collectionFieldVOS = collectionFieldManager.getCollectionFieldByDataSourceId(dataSourceId);
+        return ResponseVO.buildSuccess(collectionFieldVOS);
     }
 }

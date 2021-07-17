@@ -9,7 +9,7 @@ import xyz.bd7xzz.kane.collection.impl.JSONDataHandlerImpl;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
 import xyz.bd7xzz.kane.constraint.CollectionDataSerializeTypeConstraint;
 import xyz.bd7xzz.kane.constraint.ServiceHandler;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.serialize.HttpJSONSerializeHandler;
 import xyz.bd7xzz.kane.util.DateUtil;
 import xyz.bd7xzz.kane.vo.CollectionVO;
@@ -32,12 +32,12 @@ public class HttpCollectionServiceImpl implements ServiceHandler {
     @Override
     public <P> void doService(P param) {
         if (!(param instanceof ConnectionVO)) {
-            throw new KaneRuntimException("invalid connection vo class " + param.getClass() + ",target class is ConnectionVO");
+            throw new KaneRuntimeException("invalid connection vo class " + param.getClass() + ",target class is ConnectionVO");
         }
         ConnectionVO connectionVO = (ConnectionVO) param;
         Object connection = connectionVO.getConnection();
         if (!(connection instanceof HttpConnectionVO)) {
-            throw new KaneRuntimException("invalid connection class " + param.getClass() + ",target class is HttpConnectionVO");
+            throw new KaneRuntimeException("invalid connection class " + param.getClass() + ",target class is HttpConnectionVO");
         }
         HttpConnectionVO httpConnection = (HttpConnectionVO) connection;
         Response response;

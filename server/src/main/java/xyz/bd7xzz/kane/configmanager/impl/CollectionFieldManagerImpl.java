@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import xyz.bd7xzz.kane.cache.LocalCache;
 import xyz.bd7xzz.kane.configmanager.CollectionFieldManager;
 import xyz.bd7xzz.kane.configmanager.repository.CollectionFieldRepository;
-import xyz.bd7xzz.kane.exception.KaneRuntimException;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.po.CollectionFieldPO;
 import xyz.bd7xzz.kane.properties.SnowFlakeProperties;
 import xyz.bd7xzz.kane.util.BeanUtil;
@@ -33,11 +34,13 @@ public class CollectionFieldManagerImpl implements CollectionFieldManager {
 
     private final CollectionFieldRepository collectionFieldRepository;
     private final SnowFlakeProperties snowFlakeProperties;
+    private final LocalCache localCache;
 
     @Autowired
-    public CollectionFieldManagerImpl(CollectionFieldRepository collectionFieldRepository, SnowFlakeProperties snowFlakeProperties) {
+    public CollectionFieldManagerImpl(CollectionFieldRepository collectionFieldRepository, SnowFlakeProperties snowFlakeProperties, LocalCache localCache) {
         this.collectionFieldRepository = collectionFieldRepository;
         this.snowFlakeProperties = snowFlakeProperties;
+        this.localCache = localCache;
     }
 
     @Override
@@ -58,20 +61,78 @@ public class CollectionFieldManagerImpl implements CollectionFieldManager {
             collectionFieldRepository.batchSave(fieldPOS);
         } catch (IllegalAccessException | InstantiationException e) {
             log.error("convertDataSourceConfigPO error when copy bean", e);
-            throw new KaneRuntimException("add collection field error");
+            throw new KaneRuntimeException("add collection field error");
         }
         return ids;
     }
 
     @Override
     public CollectionFieldVO getById(long id) {
-        CollectionFieldPO collectionFieldPO = collectionFieldRepository.getById(id);
+        CollectionFieldPO collectionFieldPO = getCollectionField(id);
         try {
             return BeanUtil.copy(collectionFieldPO, CollectionFieldVO.class);
         } catch (IllegalAccessException | InstantiationException e) {
             log.error("getById error when copy bean", e);
-            throw new KaneRuntimException("get collection field error");
+            throw new KaneRuntimeException("get collection field error");
         }
+    }
+
+    @Override
+    public void deleteCollectionField(long id) {
+        CollectionFieldPO collectionFieldPO = getCollectionField(id);
+        localCache.getCollectionFieldCache().invalidate(collectionFieldPO.getDataSourceId());
+        collectionFieldRepository.deleteCollectionField(id);
+    }
+
+    @Override
+    public List<CollectionFieldVO> getCollectionFieldByDataSourceId(long dataSourceId) {
+        List<CollectionFieldPO> collectionFieldPOS = collectionFieldRepository.getCollectionFieldByDataSourceId(dataSourceId);
+        if (CollectionUtils.isEmpty(collectionFieldPOS)) {
+            return Lists.newArrayListWithCapacity(0);
+        }
+        try {
+            return BeanUtil.copy(collectionFieldPOS, CollectionFieldVO.class);
+        } catch (IllegalAccessException | InstantiationException e) {
+            log.error("getCollectionFieldByDataSourceId error when copy bean", e);
+            throw new KaneRuntimeException("get collection field error");
+        }
+    }
+
+    @Override
+    public void updateCollectionField(CollectionFieldVO collectionFieldVO, DataSourceConfigVO dataSourceConfigVO) {
+        localCache.getCollectionFieldCache().invalidate(dataSourceConfigVO.getId());
+        CollectionFieldPO collectionFieldPO = getCollectionField(collectionFieldVO.getId());
+        CollectionFieldPO newField = convertPO(collectionFieldVO).diffAndSet(collectionFieldPO);
+        collectionFieldRepository.updateCollectionField(newField);
+    }
+
+    /**
+     * 转换采集字段vo
+     *
+     * @param collectionFieldVO 采集字段vo
+     * @return 采集字段po
+     */
+    private CollectionFieldPO convertPO(CollectionFieldVO collectionFieldVO) {
+        try {
+            return BeanUtil.copy(collectionFieldVO, CollectionFieldPO.class);
+        } catch (IllegalAccessException | InstantiationException e) {
+            log.error("getCollectionFieldByDataSourceId error when copy bean", e);
+            throw new KaneRuntimeException("get collection field error");
+        }
+    }
+
+    /**
+     * 按id获取采集字段
+     *
+     * @param id 采集字段id
+     * @return 采集字段po
+     */
+    private CollectionFieldPO getCollectionField(long id) {
+        CollectionFieldPO collectionFieldPO = collectionFieldRepository.getById(id);
+        if (null == collectionFieldPO) {
+            throw new IllegalArgumentException("invalid collection field id");
+        }
+        return collectionFieldPO;
     }
 
     /**
