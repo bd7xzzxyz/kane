@@ -55,7 +55,8 @@ public class KafkaConnectionHandler extends ConnectionHandler {
             for (Class<?> serializeClass : serializeClasses) {
                 if (serializeClass.equals(KafkaJSONSerializeHandler.class)) {
                     CollectionDataHandler collectionDataHandler = SpringContextUtil.getBean(JSONDataHandlerImpl.class);
-                    collectionDataHandler.extract(CollectionVO.builder()
+                    collectionDataHandler.extractAndSave(CollectionVO.builder()
+                            .dataSourceId(kafkaDriverVO.getId())
                             .from(DataSourceTypeConstraint.REAL_TIME_KAFKA.getType())
                             .generationTime(record.timestamp())
                             .jsonData(KafkaJSONSerializeHandler.deserializer(record.value()))

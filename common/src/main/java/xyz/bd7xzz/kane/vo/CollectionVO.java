@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CollectionVO {
+    private long dataSourceId;
     private int from;
     private long generationTime;
     private String jsonData;

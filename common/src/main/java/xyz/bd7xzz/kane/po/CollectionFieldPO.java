@@ -17,6 +17,7 @@ public class CollectionFieldPO {
     private String sourceField;
     private String targetField;
     private int type;
+    private boolean primaryKey;
     private String comment;
     private String version;
 
@@ -47,6 +48,9 @@ public class CollectionFieldPO {
         }
         if (StringUtils.isEmpty(comment)) {
             comment = oldField.getComment();
+        }
+        if (!primaryKey) {
+            primaryKey = oldField.isPrimaryKey();
         }
         return this;
     }

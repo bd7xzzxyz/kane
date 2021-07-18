@@ -65,6 +65,35 @@ public class JSONUtil {
         return new Gson().fromJson(json, JsonElement.class);
     }
 
+    /**
+     * 是否是json array
+     *
+     * @param json json字符串
+     * @return true为是 false为 不是
+     */
+    public static boolean isJSONArray(String json) {
+        JsonElement jsonElement = parseElement(json);
+        if (null == jsonElement) {
+            return false;
+        }
+
+        return jsonElement.isJsonArray();
+    }
+
+    /**
+     * 是否是json object
+     *
+     * @param json json字符串
+     * @return true为是 false为 不是
+     */
+    public static boolean isJSONOBject(String json) {
+        JsonElement jsonElement = parseElement(json);
+        if (null == jsonElement) {
+            return false;
+        }
+
+        return jsonElement.isJsonObject();
+    }
 
     /**
      * 转换jsonArray

@@ -73,7 +73,8 @@ public class HttpCollectionServiceImpl implements ServiceHandler {
             for (Class<?> serializeClass : serializeClasses) {
                 if (serializeClass.equals(HttpJSONSerializeHandler.class)) {
                     CollectionDataHandler collectionDataHandler = SpringContextUtil.getBean(JSONDataHandlerImpl.class);
-                    collectionDataHandler.extract(CollectionVO.builder()
+                    collectionDataHandler.extractAndSave(CollectionVO.builder()
+                            .dataSourceId(connectionVO.getId())
                             .from(connectionVO.getType())
                             .generationTime(DateUtil.getUnixTimestamp())
                             .jsonData(HttpJSONSerializeHandler.deserializer(response.body().bytes()))

@@ -16,6 +16,7 @@ public class CollectionFieldVO {
     private String sourceField;
     private String targetField;
     private int type;
+    private boolean primaryKey;
     private String comment;
     private String version;
 }
