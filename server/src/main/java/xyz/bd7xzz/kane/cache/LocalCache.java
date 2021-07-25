@@ -16,6 +16,7 @@ import xyz.bd7xzz.kane.util.JSONUtil;
 import xyz.bd7xzz.kane.vo.CollectionFieldVO;
 import xyz.bd7xzz.kane.vo.ConnectionVO;
 import xyz.bd7xzz.kane.vo.DataSourceConfigVO;
+import xyz.bd7xzz.kane.vo.SelectionTaskVO;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
 
 import javax.annotation.PostConstruct;
@@ -80,6 +81,14 @@ public class LocalCache {
                 }
             });
 
+    private final LoadingCache<Long, SelectionTaskVO> selectionTaskCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, SelectionTaskVO>() {
+        @Override
+        public SelectionTaskVO load(Long key) throws Exception {
+            //TODO
+            return null;
+        }
+    });
+
     @Autowired
     public LocalCache(DataSourceConfigManager dataSourceConfigManager, CollectionFieldManager collectionFieldManager) {
         this.dataSourceConfigManager = dataSourceConfigManager;
@@ -116,6 +125,15 @@ public class LocalCache {
      */
     public LoadingCache<Long, DataSourceConfigVO> getDataSourceConfigCache() {
         return dataSourceConfigCache;
+    }
+
+    /**
+     * 获取筛选任务缓存
+     *
+     * @return 筛选任务缓存对象
+     */
+    public LoadingCache<Long, SelectionTaskVO> getSelectionTaskCache() {
+        return selectionTaskCache;
     }
 
     /**
@@ -158,4 +176,5 @@ public class LocalCache {
     private DataSourceConfigVO loadDataSourceConfigById(long dataSourceId) {
         return dataSourceConfigManager.getDataSourceById(dataSourceId);
     }
+
 }
