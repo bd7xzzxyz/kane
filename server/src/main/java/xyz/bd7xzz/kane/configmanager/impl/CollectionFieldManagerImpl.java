@@ -100,9 +100,9 @@ public class CollectionFieldManagerImpl implements CollectionFieldManager {
 
     @Override
     public void updateCollectionField(CollectionFieldVO collectionFieldVO, DataSourceConfigVO dataSourceConfigVO) {
-        localCache.getCollectionFieldCache().invalidate(dataSourceConfigVO.getId());
         CollectionFieldPO collectionFieldPO = getCollectionField(collectionFieldVO.getId());
         CollectionFieldPO newField = convertPO(collectionFieldVO).diffAndSet(collectionFieldPO);
+        localCache.getCollectionFieldCache().invalidate(dataSourceConfigVO.getId());
         collectionFieldRepository.updateCollectionField(newField);
     }
 

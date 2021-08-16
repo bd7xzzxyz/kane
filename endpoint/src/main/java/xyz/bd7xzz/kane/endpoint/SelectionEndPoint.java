@@ -3,7 +3,9 @@ package xyz.bd7xzz.kane.endpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.bd7xzz.kane.selection.SelectionFacade;
+import xyz.bd7xzz.kane.util.JSONUtil;
 import xyz.bd7xzz.kane.vo.ResponseVO;
+import xyz.bd7xzz.kane.vo.SelectionConfigVO;
 
 @RestController
 @RequestMapping("/selection")
@@ -18,51 +20,49 @@ public class SelectionEndPoint {
 
     @PutMapping("/")
     public ResponseVO createSelection(@RequestBody String requestJSON) {
-        return null;
+        SelectionConfigVO selectionConfig = JSONUtil.parseObject(requestJSON, SelectionConfigVO.class);
+        return selectionFacade.createSelection(selectionConfig);
     }
 
-    @PostMapping("/")
-    public ResponseVO updateSelection(@RequestBody String requestJSON) {
-        return null;
+    @PostMapping("/{id}")
+    public ResponseVO updateSelection(@PathVariable long id, @RequestBody String requestJSON) {
+        SelectionConfigVO selectionConfig = JSONUtil.parseObject(requestJSON, SelectionConfigVO.class);
+        selectionConfig.setId(id);
+        return selectionFacade.updateSelection(selectionConfig);
     }
 
     @DeleteMapping("/{id}")
     public ResponseVO deleteSelection(@PathVariable long id) {
-        return null;
+        return selectionFacade.deleteSelection(id);
     }
 
     @GetMapping("/{id}")
     public ResponseVO getSelection(@PathVariable long id) {
-        return null;
+        return selectionFacade.getSelection(id);
     }
 
-    @PostMapping("/execute")
-    public ResponseVO executeSelection(@RequestBody String requestJSON) {
-        return null;
-    }
-
-    @GetMapping("/task/{subTaskId}")
-    public ResponseVO getSubTask(@PathVariable long subTaskId) {
-        return null;
-    }
-
-    @PostMapping("/task/kill/{subTaskId}")
-    public ResponseVO killTask(@PathVariable long subTaskId) {
-        return null;
-    }
-
-    @PostMapping("/task/cancel/{subTaskId}")
-    public ResponseVO subTaskId(@PathVariable long subTaskId) {
-        return null;
+    @PostMapping("/execute/{id}")
+    public ResponseVO executeSelection(@PathVariable long id) {
+        return selectionFacade.executeSelection(id);
     }
 
     @PostMapping("/task/stop/{taskId}")
     public ResponseVO stopTask(@PathVariable long taskId) {
-        return null;
+        return selectionFacade.stopTask(taskId);
     }
 
-    @PostMapping("/task/start/{taskId}")
-    public ResponseVO startTask(@PathVariable long taskId) {
-        return null;
+    @PostMapping("/task/pause/{taskId}")
+    public ResponseVO pauseTask(@PathVariable long taskId) {
+        return selectionFacade.pauseTask(taskId);
+    }
+
+    @PostMapping("/task/resume/{taskId}")
+    public ResponseVO resumeTask(@PathVariable long taskId) {
+        return selectionFacade.resumeTask(taskId);
+    }
+
+    @GetMapping("/task/{taskId}")
+    public ResponseVO getTask(@PathVariable long taskId) {
+        return selectionFacade.getTask(taskId);
     }
 }

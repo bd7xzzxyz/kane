@@ -86,7 +86,7 @@ public class JSONUtil {
      * @param json json字符串
      * @return true为是 false为 不是
      */
-    public static boolean isJSONOBject(String json) {
+    public static boolean isJSONObject(String json) {
         JsonElement jsonElement = parseElement(json);
         if (null == jsonElement) {
             return false;
@@ -106,6 +106,19 @@ public class JSONUtil {
             return new JsonArray(0);
         }
         return new Gson().fromJson(json, JsonArray.class);
+    }
+
+    /**
+     * 转换成json字符串
+     *
+     * @param obj
+     * @return
+     */
+    public static String toJSONString(Object obj) {
+        if (null == obj) {
+            return null;
+        }
+        return new Gson().toJson(obj);
     }
 
     /**
