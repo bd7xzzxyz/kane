@@ -102,7 +102,7 @@ public class SelectionConfigManagerImpl implements SelectionConfigManager {
      * @return 筛选配置PO对象
      */
     private SelectionConfigPO getSelectionPO(long id) {
-        SelectionConfigPO selectionConfigPO = configRepository.getSelectionPO(id);
+        SelectionConfigPO selectionConfigPO = configRepository.get(id);
         if (null == selectionConfigPO) {
             throw new IllegalArgumentException("invalid selection config id");
         }

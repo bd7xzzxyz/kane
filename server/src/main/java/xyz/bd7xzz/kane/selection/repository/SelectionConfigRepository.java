@@ -9,7 +9,12 @@ import xyz.bd7xzz.kane.po.SelectionConfigPO;
  * @date 7/25/21 10:46 PM
  */
 public interface SelectionConfigRepository {
-    SelectionConfigPO getSelectionPO(long id);
+    /**
+     * 根据id获取
+     * @param id 筛选配置id
+     * @return 筛选配置
+     */
+    SelectionConfigPO get(long id);
 
     /**
      * 保存筛选配置

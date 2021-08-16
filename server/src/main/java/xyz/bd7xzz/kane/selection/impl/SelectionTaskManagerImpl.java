@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Service
 public class SelectionTaskManagerImpl implements SelectionTaskManager {
+
     @Override
     public void stopTask(long id) {
 
