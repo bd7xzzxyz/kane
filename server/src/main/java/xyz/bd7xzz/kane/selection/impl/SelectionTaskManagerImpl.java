@@ -20,6 +20,7 @@ import xyz.bd7xzz.kane.po.SelectionTaskPO;
 import xyz.bd7xzz.kane.properties.SnowFlakeProperties;
 import xyz.bd7xzz.kane.selection.SelectionConfigManager;
 import xyz.bd7xzz.kane.selection.SelectionProcessHandler;
+import xyz.bd7xzz.kane.selection.SelectionSignalRegister;
 import xyz.bd7xzz.kane.selection.SelectionTaskManager;
 import xyz.bd7xzz.kane.selection.repository.SelectionTaskHistoryRepository;
 import xyz.bd7xzz.kane.selection.repository.SelectionTaskRepository;
@@ -81,7 +82,6 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
         SelectionTaskVO selectionTaskVO = getSelectionTaskVO(taskId);
         optionTaskStatus(selectionTaskVO, SelectionTaskSignalConstraint.PAUSE,
                 SelectionConstraints.TASK_STATE_PAUSED, SelectionConstraints.TASK_MESSAGE_CODE_MANUAL_PAUSE);
-
     }
 
     @Override
@@ -125,6 +125,7 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
                 @Override
                 public void onSuccess(Object o) {
                     log.info("{} submitScheduledTask-SelectionProcessHandler.doProcess success!", context.getCurrentThreadName());
+                    SelectionSignalRegister.clear(context.getTask().getTaskId());
                     setStatusToCache(SelectionConstraints.TASK_STATE_DONE, task);
                     selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATE_DONE, context.getSelectionResult().toString(), SelectionConstraints.TASK_MESSAGE_CODE_SUCCESS);
                 }
@@ -132,6 +133,7 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
                 @Override
                 public void onFailure(Throwable throwable) {
                     log.error(context.getCurrentThreadName() + " taskExecutor-SelectionProcessHandler.doProcess error!", throwable);
+                    SelectionSignalRegister.clear(context.getTask().getTaskId());
                     setStatusToCache(SelectionConstraints.TASK_STATE_ERROR, task);
                     selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATE_ERROR, throwable.getMessage(),
                             throwable instanceof KaneRuntimeException ? SelectionConstraints.TASK_MESSAGE_CODE_BIZ_ERROR : SelectionConstraints.TASK_MESSAGE_CODE_BIZ_JAVA_ERROR);
@@ -262,6 +264,8 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
                                     setStatusToCache(SelectionConstraints.TASK_STATE_ERROR, context.getTask());
                                     selectionTaskHistoryRepository.updateStatus(context.getTask().getTaskId(), SelectionConstraints.TASK_STATE_ERROR, e.getMessage(),
                                             e instanceof KaneRuntimeException ? SelectionConstraints.TASK_MESSAGE_CODE_BIZ_ERROR : SelectionConstraints.TASK_MESSAGE_CODE_BIZ_JAVA_ERROR);
+                                } finally {
+                                    SelectionSignalRegister.clear(context.getTask().getTaskId());
                                 }
                             }
                         })

@@ -42,7 +42,7 @@ public class SelectionProcessorAOP {
         }
         if (taskContextVO.getSignalFlag() != null) {
             taskContextVO.setSignalFlag(null);
-            return SelectionSignalRegister.checkAndExecute(taskContextVO);
+            return SelectionSignalRegister.checkAndExecute(taskContextVO, true);
         }
         return result;
     }
