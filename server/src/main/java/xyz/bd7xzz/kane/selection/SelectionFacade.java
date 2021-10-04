@@ -55,8 +55,8 @@ public class SelectionFacade {
      * @return 成功true 失败false
      */
     public ResponseVO deleteSelection(long id) {
-        List<SelectionTaskVO> tasks = selectionTaskManager.findTasksBySelectionConfigId(id);
-        tasks.forEach(selectionTaskVO -> selectionTaskManager.stopTask(id));
+        List<Long> tasks = selectionTaskManager.findTaskIdsBySelectionConfigId(id);
+        tasks.forEach(taskId-> selectionTaskManager.stopTask(taskId));
         selectionConfigManager.deleteSelection(id);
         return ResponseVO.buildSuccess();
     }

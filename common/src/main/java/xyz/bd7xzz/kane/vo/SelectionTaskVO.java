@@ -17,6 +17,7 @@ public class SelectionTaskVO {
     private long configId;
     @Setter
     private short status;
+    @Setter
     private Message successMessage;
     private Message errorMessage;
     private String executeTime;

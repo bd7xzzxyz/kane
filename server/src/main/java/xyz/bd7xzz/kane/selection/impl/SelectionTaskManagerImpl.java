@@ -1,5 +1,6 @@
 package xyz.bd7xzz.kane.selection.impl;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import xyz.bd7xzz.kane.cache.LocalCache;
 import xyz.bd7xzz.kane.constraint.SelectionConstraints;
+import xyz.bd7xzz.kane.constraint.SelectionTaskSignalConstraint;
 import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.po.SelectionTaskHistoryPO;
 import xyz.bd7xzz.kane.po.SelectionTaskPO;
@@ -32,6 +34,7 @@ import xyz.bd7xzz.kane.vo.TaskContextVO;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author bd7xzz
@@ -62,27 +65,30 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
     }
 
     @Override
-    public List<SelectionTaskVO> findTasksBySelectionConfigId(long id) {
-        //TODO
-
-        return null;
+    public List<Long> findTaskIdsBySelectionConfigId(long id) {
+        return selectionTaskRepository.getTaskIdByConfigId(id);
     }
 
     @Override
     public void stopTask(long id) {
-        //TODO
-
+        SelectionTaskVO selectionTaskVO = getSelectionTaskVO(id);
+        optionTaskStatus(selectionTaskVO, SelectionTaskSignalConstraint.STOPPED,
+                SelectionConstraints.TASK_STATE_DONE, SelectionConstraints.TASK_MESSAGE_CODE_MANUAL_STOP);
     }
 
     @Override
     public void pauseTask(long taskId) {
-        //TODO
+        SelectionTaskVO selectionTaskVO = getSelectionTaskVO(taskId);
+        optionTaskStatus(selectionTaskVO, SelectionTaskSignalConstraint.PAUSE,
+                SelectionConstraints.TASK_STATE_PAUSED, SelectionConstraints.TASK_MESSAGE_CODE_MANUAL_PAUSE);
+
     }
 
     @Override
     public void resumeTask(long taskId) {
-        //TODO
-
+        SelectionTaskVO selectionTaskVO = getSelectionTaskVO(taskId);
+        optionTaskStatus(selectionTaskVO, SelectionTaskSignalConstraint.RESUME,
+                SelectionConstraints.TASK_STATE_RUNNING, SelectionConstraints.TASK_MESSAGE_CODE_SUCCESS);
     }
 
     @Override
@@ -95,6 +101,7 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
             throw new KaneRuntimeException("execute error");
         }
         long id = SnowFlake.getId(snowFlakeProperties.getDataCenterId(), snowFlakeProperties.getMachineId());
+        String threadName = buildThreadName(id);
         SelectionTaskVO task = SelectionTaskVO.builder()
                 .taskId(id)
                 .configId(configId)
@@ -103,27 +110,30 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
         TaskContextVO context = TaskContextVO.builder()
                 .task(task)
                 .selectionConfig(selectionConfigVO)
+                .currentThreadName(threadName)
                 .build();
         if (StringUtils.isNotEmpty(selectionConfigVO.getCron())) {
             Calendar calendar = cronToCalendar(selectionConfigVO.getCron());
-            task.setStatus(SelectionConstraints.TASK_STATUS_WAITING);
+            task.setStatus(SelectionConstraints.TASK_STATE_WAITING);
             submitScheduledTask(context, calendar);
         } else {
-            task.setStatus(SelectionConstraints.TASK_STATUS_RUNNING);
+            task.setStatus(SelectionConstraints.TASK_STATE_RUNNING);
             taskExecutor.submitListenable(() -> {
-                Thread.currentThread().setName(buildThreadName(id));
-                SelectionProcessHandler.doProcess(context);
+                Thread.currentThread().setName(context.getCurrentThreadName());
+                SelectionProcessHandler.doProcess(context); //执行筛选
             }).addCallback(new ListenableFutureCallback<Object>() {
                 @Override
                 public void onSuccess(Object o) {
-                    setStatusToCache(SelectionConstraints.TASK_STATUS_DONE, task);
-                    selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATUS_DONE, o.toString(), SelectionConstraints.TASK_MESSAGE_CODE_SUCCESS);
+                    log.info("{} submitScheduledTask-SelectionProcessHandler.doProcess success!", context.getCurrentThreadName());
+                    setStatusToCache(SelectionConstraints.TASK_STATE_DONE, task);
+                    selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATE_DONE, context.getSelectionResult().toString(), SelectionConstraints.TASK_MESSAGE_CODE_SUCCESS);
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    setStatusToCache(SelectionConstraints.TASK_STATUS_ERROR, task);
-                    selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATUS_ERROR, throwable.getMessage(),
+                    log.error(context.getCurrentThreadName() + " taskExecutor-SelectionProcessHandler.doProcess error!", throwable);
+                    setStatusToCache(SelectionConstraints.TASK_STATE_ERROR, task);
+                    selectionTaskHistoryRepository.updateStatus(id, SelectionConstraints.TASK_STATE_ERROR, throwable.getMessage(),
                             throwable instanceof KaneRuntimeException ? SelectionConstraints.TASK_MESSAGE_CODE_BIZ_ERROR : SelectionConstraints.TASK_MESSAGE_CODE_BIZ_JAVA_ERROR);
                 }
             });
@@ -138,11 +148,27 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
 
     @Override
     public SelectionTaskVO getTask(long taskId) {
-        SelectionTaskVO taskVO = localCache.getSelectionTaskCache().getUnchecked(taskId);
+        SelectionTaskVO taskVO = localCache.getSelectionTaskCache().getIfPresent(taskId);
         if (null == taskVO) {
             taskVO = loadTask(taskId);
         }
         return taskVO;
+    }
+
+    @Override
+    public void single(long taskId, SelectionTaskSignalConstraint signalConstraint) {
+        TaskContextVO taskContext = localCache.getTaskContextCache().get(taskId);
+        if (null == taskContext) {
+            log.warn("ignore single {} with task id {},task not found", signalConstraint, taskId);
+            return;
+        }
+
+        while (true) {
+            if (taskContext.setSignalFlag(signalConstraint)) {
+                return;
+            }
+            Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MICROSECONDS);
+        }
     }
 
     /**
@@ -169,7 +195,7 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
      * @param task   task vo
      */
     private void setStatusToCache(short status, SelectionTaskVO task) {
-        SelectionTaskVO cachedTask = localCache.getSelectionTaskCache().getUnchecked(task.getTaskId());
+        SelectionTaskVO cachedTask = localCache.getSelectionTaskCache().getIfPresent(task.getTaskId());
         if (null == cachedTask) {
             localCache.getSelectionTaskCache().put(task.getTaskId(), task);
         }
@@ -190,7 +216,7 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
         }
         if (null == taskHistoryPO) {
             return SelectionTaskVO.builder()
-                    .status(SelectionConstraints.TASK_STATUS_UNKNOWN)
+                    .status(SelectionConstraints.TASK_STATE_UNKNOWN)
                     .taskId(taskId)
                     .executeTime(StringUtils.EMPTY)
                     .nextExecuteTime(StringUtils.EMPTY)
@@ -228,11 +254,19 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
                         .runnable(new TimerUtil.TaskExecutor() {
                             @Override
                             public void run() {
-                                SelectionProcessHandler.doProcess(context);
+                                try {
+                                    SelectionProcessHandler.doProcess(context); //执行筛选
+                                    log.info("{} submitScheduledTask-SelectionProcessHandler.doProcess success!", context.getCurrentThreadName());
+                                } catch (Exception e) {
+                                    log.error(context.getCurrentThreadName() + " submitScheduledTask-SelectionProcessHandler.doProcess error!", e);
+                                    setStatusToCache(SelectionConstraints.TASK_STATE_ERROR, context.getTask());
+                                    selectionTaskHistoryRepository.updateStatus(context.getTask().getTaskId(), SelectionConstraints.TASK_STATE_ERROR, e.getMessage(),
+                                            e instanceof KaneRuntimeException ? SelectionConstraints.TASK_MESSAGE_CODE_BIZ_ERROR : SelectionConstraints.TASK_MESSAGE_CODE_BIZ_JAVA_ERROR);
+                                }
                             }
                         })
                         .executor(taskExecutor)
-                        .threadName(buildThreadName(context.getTask().getTaskId()))
+                        .threadName(context.getCurrentThreadName())
                         .build()
         );
     }
@@ -275,5 +309,49 @@ public class SelectionTaskManagerImpl implements SelectionTaskManager {
      */
     private String buildThreadName(long taskId) {
         return SelectionConstraints.TASK_ID_PREFIX + taskId;
+    }
+
+    /**
+     * 获取任务vo
+     *
+     * @param id 任务id
+     * @return 任务vo对象
+     */
+    private SelectionTaskVO getSelectionTaskVO(long id) {
+        SelectionTaskVO selectionTaskVO = getTask(id);
+        if (null == selectionTaskVO) {
+            throw new IllegalArgumentException("invalid task id");
+        }
+        return selectionTaskVO;
+    }
+
+    /**
+     * 修改任务状态
+     *
+     * @param selectionTaskVO  任务vo
+     * @param signalConstraint 信号
+     * @param status           任务状态
+     * @param code             状态码
+     */
+    private void optionTaskStatus(SelectionTaskVO selectionTaskVO, SelectionTaskSignalConstraint signalConstraint, short status, int code) {
+        if (SelectionConstraints.isFinalFinalState(status)) { //不是最终状态
+            return;
+        }
+        single(selectionTaskVO.getTaskId(), signalConstraint);//发信号暂停任务
+        String message = StringUtils.EMPTY;
+        String now = DateFormatUtils.format(new Date(), SelectionConstraints.DATE_FORMAT);
+        if (signalConstraint.equals(SelectionTaskSignalConstraint.PAUSE)) {
+            message = String.format(SelectionConstraints.TASK_MESSAGE_CODE_PAUSED_MESSAGE, now);
+        } else if (signalConstraint.equals(SelectionTaskSignalConstraint.STOPPED)) {
+            message = String.format(SelectionConstraints.TASK_MESSAGE_CODE_STOPPED_MESSAGE, now);
+        } else if (signalConstraint.equals(SelectionTaskSignalConstraint.RESUME)) {
+            message = StringUtils.EMPTY;
+        }
+        selectionTaskVO.setSuccessMessage(SelectionTaskVO.Message.builder()
+                .code(code)
+                .message(message)
+                .build());
+        setStatusToCache(status, selectionTaskVO);
+        selectionTaskHistoryRepository.updateStatus(selectionTaskVO.getTaskId(), status, message, code);
     }
 }

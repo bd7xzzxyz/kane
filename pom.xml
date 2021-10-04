@@ -8,6 +8,10 @@
         <module>engine</module>
         <module>endpoint</module>
         <module>common</module>
+        <module>engine-elastic</module>
+        <module>engine-sql</module>
+        <module>engine-kane</module>
+        <module>engine-redis</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -29,6 +33,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>

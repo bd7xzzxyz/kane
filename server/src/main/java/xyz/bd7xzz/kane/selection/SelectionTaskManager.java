@@ -1,6 +1,7 @@
 package xyz.bd7xzz.kane.selection;
 
 
+import xyz.bd7xzz.kane.constraint.SelectionTaskSignalConstraint;
 import xyz.bd7xzz.kane.vo.SelectionTaskVO;
 
 import java.util.List;
@@ -24,9 +25,9 @@ public interface SelectionTaskManager {
      * 根据配置id查找任务
      *
      * @param id SelectionConfig的id
-     * @return 匹配到的所有任务
+     * @return 匹配到的所有任务id
      */
-    List<SelectionTaskVO> findTasksBySelectionConfigId(long id);
+    List<Long> findTaskIdsBySelectionConfigId(long id);
 
     /**
      * 暂停任务
@@ -57,4 +58,10 @@ public interface SelectionTaskManager {
      * @return 筛选任务 SelectionTaskVO
      */
     SelectionTaskVO getTask(long taskId);
+
+    /**
+     * 向筛选任务发信号
+     * @param taskId
+     */
+    void single(long taskId, SelectionTaskSignalConstraint signalConstraint);
 }

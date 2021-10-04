@@ -1,5 +1,6 @@
 package xyz.bd7xzz.kane.cache;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -84,7 +85,7 @@ public class LocalCache {
                 }
             });
 
-    private final LoadingCache<Long, SelectionTaskVO> selectionTaskCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, SelectionTaskVO>() {
+    private final Cache<Long, SelectionTaskVO> selectionTaskCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, SelectionTaskVO>() {
         @Override
         public SelectionTaskVO load(Long key) throws Exception {
             return loadSelectionTaskVOById(key);
@@ -104,6 +105,8 @@ public class LocalCache {
                     return loadSelectionConfigById(key, null);
                 }
             });
+
+    private static final Map<Long, TaskContextVO> TASK_CONTEXT_CACHE = Maps.newConcurrentMap();
 
     @Autowired
     public LocalCache(DataSourceConfigManager dataSourceConfigManager, CollectionFieldManager collectionFieldManager,
@@ -151,7 +154,7 @@ public class LocalCache {
      *
      * @return 筛选任务缓存对象
      */
-    public LoadingCache<Long, SelectionTaskVO> getSelectionTaskCache() {
+    public Cache<Long, SelectionTaskVO> getSelectionTaskCache() {
         return selectionTaskCache;
     }
 
@@ -162,6 +165,15 @@ public class LocalCache {
      */
     public LoadingCache<Long, SelectionConfigVO> getSelectionConfigCache() {
         return selectionConfigCache;
+    }
+
+    /**
+     * 获取跟踪任务上下文的缓存
+     *
+     * @return 上下文缓存
+     */
+    public Map<Long, TaskContextVO> getTaskContextCache() {
+        return TASK_CONTEXT_CACHE;
     }
 
     /**

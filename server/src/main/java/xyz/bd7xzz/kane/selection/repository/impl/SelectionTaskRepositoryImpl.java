@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import xyz.bd7xzz.kane.po.SelectionTaskPO;
 import xyz.bd7xzz.kane.selection.repository.SelectionTaskRepository;
 
+import java.util.List;
+
 /**
  * @author baodi1
  * @description: 筛选任务落地
@@ -16,7 +18,7 @@ public class SelectionTaskRepositoryImpl implements SelectionTaskRepository {
 
     private static final String SAVE_SQL = "INSERT INTO `t_selection_task`(`tid`,`config_id`,`config`,`is_delete`,`ctime`,`utime`)VALUES(?,?,?,0,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())";
     private static final String GET_SQL = "SELECT `config_id`,`config`,`ctime`,`utime` FROM `t_selection_task` WHERE `tid` = ? AND `is_delete` = 0 LIMIT 1";
-
+    private static final String GET_TASK_ID_BY_CONFIG_ID_SQL = "SELECT `tid` FROM `t_selection_task` WHERE `config_id` = ? AND `is_delete` = 0";
     private final JdbcTemplate jdbcTemplate;
 
     public SelectionTaskRepositoryImpl(JdbcTemplate jdbcTemplate) {
@@ -31,5 +33,10 @@ public class SelectionTaskRepositoryImpl implements SelectionTaskRepository {
     @Override
     public SelectionTaskPO get(long taskId) {
         return jdbcTemplate.queryForObject(GET_SQL, new BeanPropertyRowMapper<>(SelectionTaskPO.class), taskId);
+    }
+
+    @Override
+    public List<Long> getTaskIdByConfigId(long id) {
+        return jdbcTemplate.queryForList(GET_TASK_ID_BY_CONFIG_ID_SQL, Long.class, id);
     }
 }

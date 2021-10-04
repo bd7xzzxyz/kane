@@ -2,6 +2,8 @@ package xyz.bd7xzz.kane.selection.repository;
 
 import xyz.bd7xzz.kane.po.SelectionTaskPO;
 
+import java.util.List;
+
 /**
  * @author baodi1
  * @description: 筛选任务落地
@@ -24,4 +26,11 @@ public interface SelectionTaskRepository {
      */
     SelectionTaskPO get(long taskId);
 
+    /**
+     * 根据配置id获取筛选任务id
+     *
+     * @param id 筛选配置id
+     * @return 关联的筛选任务id
+     */
+    List<Long> getTaskIdByConfigId(long id);
 }

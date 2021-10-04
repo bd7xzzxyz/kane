@@ -30,7 +30,7 @@ public class SelectionTaskHistoryRepositoryImpl implements SelectionTaskHistoryR
 
     @Override
     public void updateStatus(long taskId, short taskStatus, String message, int code) {
-        if (taskStatus == SelectionConstraints.TASK_STATUS_ERROR) {
+        if (taskStatus == SelectionConstraints.TASK_STATE_ERROR) {
             jdbcTemplate.update(UPDATE_ERROR_STATUS_SQL, taskStatus, message, code, taskId);
         } else {
             jdbcTemplate.update(UPDATE_STATUS_SQL, taskStatus, message, code, taskId);

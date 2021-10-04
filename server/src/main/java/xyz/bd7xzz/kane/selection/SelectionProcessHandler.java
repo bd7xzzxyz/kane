@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.bd7xzz.kane.component.SpringContextUtil;
+import xyz.bd7xzz.kane.constraint.SelectionTaskSignalConstraint;
+import xyz.bd7xzz.kane.exception.KaneRuntimeException;
 import xyz.bd7xzz.kane.selection.processor.*;
 import xyz.bd7xzz.kane.vo.TaskContextVO;
 
@@ -28,19 +30,24 @@ public class SelectionProcessHandler {
         private Class<? extends SelectionProcessor> processClass;
     }
 
+
     /**
      * 执行处理器
      *
      * @param context 上下文
      */
     public static void doProcess(TaskContextVO context) {
+        if (null == context) {
+            throw new KaneRuntimeException("invalid task context");
+        }
+        SelectionSignalRegister.register(SelectionTaskSignalConstraint.getAllSign(),context.getTask().getTaskId());
         for (SelectionProcessors value : SelectionProcessors.values()) {
-            log.info("SelectionProcessHandler doProcess {} begin", value.getName());
+            log.info("{} SelectionProcessHandler doProcess {} begin", context.getCurrentThreadName(), value.getName());
             if (!SpringContextUtil.getBean(value.getProcessClass()).doProcess(context)) {
-                log.info("SelectionProcessHandler doProcess {} stop", value.getName());
+                log.info("{} SelectionProcessHandler doProcess {} stop", context.getCurrentThreadName(), value.getName());
                 return;
             }
-            log.info("SelectionProcessHandler doProcess {} finish", value.getName());
+            log.info("{} SelectionProcessHandler doProcess {} finish", context.getCurrentThreadName(), value.getName());
         }
     }
 }
