@@ -31,6 +31,7 @@ public class TimerUtil {
         private int second;
         private TaskExecutor runnable;
         private boolean once;
+        private String threadName;
         private Executor executor;
 
         public static class Builder {
@@ -40,6 +41,7 @@ public class TimerUtil {
             private int day;
             private TaskExecutor runnable;
             private boolean once;
+            private String threadName;
             private Executor executor;
 
             /**
@@ -109,6 +111,17 @@ public class TimerUtil {
             }
 
             /**
+             * 设置工作线程名
+             *
+             * @param threadName 线程名
+             * @return build对象
+             */
+            public Builder threadName(String threadName) {
+                this.threadName = threadName;
+                return this;
+            }
+
+            /**
              * 设置执行任务的线程池
              *
              * @param executor 线程池，默认为Executors.newCachedThreadPool()
@@ -136,6 +149,7 @@ public class TimerUtil {
             this.second = builder.second;
             this.runnable = builder.runnable;
             this.once = builder.once;
+            this.threadName = builder.threadName;
             this.executor = builder.executor;
         }
 
@@ -191,6 +205,15 @@ public class TimerUtil {
          */
         public boolean isOnce() {
             return once;
+        }
+
+        /**
+         * 获取工作线程名
+         *
+         * @return 线程名
+         */
+        public String getThreadName() {
+            return threadName;
         }
 
         /**
@@ -321,7 +344,10 @@ public class TimerUtil {
                                                 timeout.timer().newTimeout(firstTask, task.getHour(), TimeUnit.HOURS);
                                             }
                                             task.getRunnable().setTaskId(taskId);
-                                            task.getExecutor().execute(task.getRunnable());
+                                            task.getExecutor().execute(() -> {
+                                                Thread.currentThread().setName(task.getThreadName());
+                                                task.getRunnable().run();
+                                            });
                                         }, task.getSecond(), TimeUnit.SECONDS)
                                 , task.getMinute(), TimeUnit.MINUTES), task.getHour(), TimeUnit.HOURS);
             }

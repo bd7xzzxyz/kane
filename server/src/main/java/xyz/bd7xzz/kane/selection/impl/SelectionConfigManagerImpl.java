@@ -15,6 +15,8 @@ import xyz.bd7xzz.kane.util.SnowFlake;
 import xyz.bd7xzz.kane.util.VersionUtil;
 import xyz.bd7xzz.kane.vo.SelectionConfigVO;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * @author bd7xzz
  * @version 1.0
@@ -69,7 +71,17 @@ public class SelectionConfigManagerImpl implements SelectionConfigManager {
             return BeanUtil.copy(configPO, SelectionConfigVO.class);
         } catch (IllegalAccessException | InstantiationException e) {
             log.error("getSelection error!", e);
-            throw new KaneRuntimeException("get selection config field error");
+            throw new KaneRuntimeException("get selection config error");
+        }
+    }
+
+    @Override
+    public SelectionConfigVO getSelectionFromCache(long id) {
+        try {
+            return localCache.getSelectionConfigCache().get(id);
+        } catch (ExecutionException e) {
+            log.error("getSelectionFromCache error!", e);
+            throw new KaneRuntimeException("get selection config from cache error");
         }
     }
 

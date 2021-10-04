@@ -15,6 +15,7 @@ import xyz.bd7xzz.kane.configmanager.ConnectionHandler;
 import xyz.bd7xzz.kane.configmanager.DataSourceConfigManager;
 import xyz.bd7xzz.kane.constraint.DataSourceDriverConstraint;
 import xyz.bd7xzz.kane.selection.SelectionConfigManager;
+import xyz.bd7xzz.kane.selection.SelectionTaskManager;
 import xyz.bd7xzz.kane.util.JSONUtil;
 import xyz.bd7xzz.kane.vo.*;
 import xyz.bd7xzz.kane.vo.driver.BasicDriverVO;
@@ -37,6 +38,7 @@ public class LocalCache {
     private final DataSourceConfigManager dataSourceConfigManager;
     private final CollectionFieldManager collectionFieldManager;
     private final SelectionConfigManager selectionConfigManager;
+    private final SelectionTaskManager selectionTaskManager;
 
     private final LoadingCache<Long, ConnectionVO> connectionCache =
             CacheBuilder.newBuilder()
@@ -85,8 +87,7 @@ public class LocalCache {
     private final LoadingCache<Long, SelectionTaskVO> selectionTaskCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, SelectionTaskVO>() {
         @Override
         public SelectionTaskVO load(Long key) throws Exception {
-            //TODO
-            return null;
+            return loadSelectionTaskVOById(key);
         }
     });
 
@@ -105,10 +106,12 @@ public class LocalCache {
             });
 
     @Autowired
-    public LocalCache(DataSourceConfigManager dataSourceConfigManager, CollectionFieldManager collectionFieldManager, SelectionConfigManager selectionConfigManager) {
+    public LocalCache(DataSourceConfigManager dataSourceConfigManager, CollectionFieldManager collectionFieldManager,
+                      SelectionConfigManager selectionConfigManager, SelectionTaskManager selectionTaskManager) {
         this.dataSourceConfigManager = dataSourceConfigManager;
         this.collectionFieldManager = collectionFieldManager;
         this.selectionConfigManager = selectionConfigManager;
+        this.selectionTaskManager = selectionTaskManager;
     }
 
     @PostConstruct
@@ -246,5 +249,15 @@ public class LocalCache {
             return oldValue;
         }
         return selectionConfigVO;
+    }
+
+    /**
+     * 按任务id加载筛选任务
+     *
+     * @param taskId 筛选任务id
+     * @return 筛选任务
+     */
+    private SelectionTaskVO loadSelectionTaskVOById(long taskId) {
+        return selectionTaskManager.getTask(taskId);
     }
 }

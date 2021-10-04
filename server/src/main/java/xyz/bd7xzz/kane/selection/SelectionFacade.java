@@ -29,7 +29,7 @@ public class SelectionFacade {
     /**
      * 创建筛选配置
      *
-     * @param selectionConfig
+     * @param selectionConfig 筛选配置
      * @return 筛选配置的id
      */
     public ResponseVO createSelection(SelectionConfigVO selectionConfig) {
@@ -40,7 +40,7 @@ public class SelectionFacade {
     /**
      * 更新筛选配置
      *
-     * @param selectionConfig
+     * @param selectionConfig 筛选配置
      * @return 成功true 失败false
      */
     public ResponseVO updateSelection(SelectionConfigVO selectionConfig) {
@@ -51,7 +51,7 @@ public class SelectionFacade {
     /**
      * 删除筛选配置
      *
-     * @param id
+     * @param id 配置id
      * @return 成功true 失败false
      */
     public ResponseVO deleteSelection(long id) {
@@ -64,7 +64,7 @@ public class SelectionFacade {
     /**
      * 获取筛选配置
      *
-     * @param id
+     * @param id 配置id
      * @return SelectionConfigVO 配置项
      */
     public ResponseVO getSelection(long id) {
@@ -75,7 +75,7 @@ public class SelectionFacade {
     /**
      * 执行筛选
      *
-     * @param id
+     * @param id 配置id
      * @return 筛选任务id
      */
     public ResponseVO executeSelection(long id) {
@@ -86,7 +86,7 @@ public class SelectionFacade {
     /**
      * 停止任务
      *
-     * @param taskId
+     * @param taskId 筛选任务id
      * @return 成功true 失败false
      */
     public ResponseVO stopTask(long taskId) {
@@ -97,7 +97,7 @@ public class SelectionFacade {
     /**
      * 暂停任务
      *
-     * @param taskId
+     * @param taskId 筛选任务id
      * @return 成功true 失败false
      */
     public ResponseVO pauseTask(long taskId) {
@@ -108,7 +108,7 @@ public class SelectionFacade {
     /**
      * 恢复任务
      *
-     * @param taskId
+     * @param taskId 筛选任务id
      * @return 成功true 失败false
      */
     public ResponseVO resumeTask(long taskId) {
